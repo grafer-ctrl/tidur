@@ -3,242 +3,68 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="Kalkulator siklus tidur 90 menit + 15 menit terlelap. Hitung jam tidur/bangun ideal agar selalu segar!">
+  
   <title>Kalkulator Siklus Tidur</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" href="icon-192.png">
+
+  <!-- Font & Style (sama seperti versi cantik sebelumnya) -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --bg:#0a0e1a;
-      --panel:#111827ee;
-      --text:#f1f5f9;
-      --muted:#94a3b8;
-      --accent:#22d3ee;
-      --accent-2:#0ea5e9;
-      --ok:#22c55e;
-      --warn:#f59e0b;
-      --gradient: linear-gradient(135deg, #0f172a, #1e293b);
-    }
+    :root{--bg:#0a0e1a;--panel:#111827ee;--text:#f1f5f9;--muted:#94a3b8;--accent:#22d3ee;--ok:#22c55e;--warn:#f59e0b;--gradient:linear-gradient(135deg,#0f172a,#1e293b)}
     *{margin:0;padding:0;box-sizing:border-box}
-    body{
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--gradient);
-      background-attachment: fixed;
-      color: var(--text);
-      min-height: 100vh;
-      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    }
-    header{
-      text-align:center;
-      padding: 2.5rem 1rem 1.5rem;
-      background: linear-gradient(to bottom, rgba(15,23,42,0.8), transparent);
-      backdrop-filter: blur(10px);
-    }
-    header h1{
-      font-size: clamp(1.8rem, 5vw, 2.4rem);
-      font-weight: 700;
-      background: linear-gradient(90deg, #22d3ee, #a5f3fc);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: .4rem;
-    }
-    header p{
-      color: var(--muted);
-      font-size: .95rem;
-      max-width: 500px;
-      margin: 0 auto;
-    }
-    .container{
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 1rem;
-      display: grid;
-      gap: 1.5rem;
-      grid-template-columns: 1fr;
-    }
-    @media (min-width: 768px){
-      .container{ grid-template-columns: 1fr 1fr; }
-    }
-    .card{
-      background: rgba(17,24,39,0.75);
-      border: 1px solid rgba(148,163,184,0.15);
-      border-radius: 24px;
-      padding: 1.5rem;
-      box-shadow: 
-        0 20px 40px rgba(0,0,0,0.4),
-        0 0 20px rgba(34,211,238,0.08);
-      backdrop-filter: blur(16px);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .card:hover{ transform: translateY(-4px); box-shadow: 0 25px 50px rgba(0,0,0,0.5); }
-
-    .card h2{
-      font-size: 1.35rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-    }
-    .card h2::before{
-      content:"";
-      width:6px; height:100%; background:var(--accent); border-radius:3px;
-    }
-
-    .field{
-      margin-bottom: .75rem;
-    }
-    label{
-      display:block;
-      font-size:.9rem;
-      color:var(--muted);
-      margin-bottom:.4rem;
-    }
-    input[type="time"]{
-      width:100%;
-      padding:.75rem 1rem;
-      border-radius:16px;
-      border:1px solid rgba(148,163,184,.3);
-      background:rgba(15,23,42,0.8);
-      color:var(--text);
-      font-size:1.1rem;
-      backdrop-filter: blur(4px);
-      transition: all 0.2s;
-    }
-    input[type="time"]:focus{
-      outline:none;
-      border-color:var(--accent);
-      box-shadow:0 0 0 3px rgba(34,211,238,.2);
-    }
-
-    .actions{
-      display:flex; 
-      gap:.75rem; 
-      flex-wrap:wrap; 
-      margin-top:1rem;
-    }
-    button{
-      padding:.75rem 1.2rem;
-      border-radius:16px;
-      border:none;
-      font-weight:500;
-      cursor:pointer;
-      transition:all .25s;
-      flex:1;
-      min-width:140px;
-      position:relative;
-      overflow:hidden;
-    }
-    button::before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:linear-gradient(90deg, transparent, rgba(255,255,255,.15), transparent);
-      transform:translateX(-100%);
-      transition:transform .6s;
-    }
-    button:hover::before{ transform:translateX(100%); }
-
-    button.primary{
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color:white;
-      box-shadow:0 8px 20px rgba(34,197,94,.3);
-    }
-    button.secondary{
-      background: linear-gradient(135deg, rgba(34,211,238,.2), rgba(14,165,233,.15));
-      border:1px solid rgba(34,211,238,.4);
-      color:var(--text);
-    }
-    button:hover{ transform:translateY(-2px); }
-
-    .result{
-      margin-top:1.5rem;
-      display:grid;
-      gap:1rem;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    }
-    .pill{
-      padding:1rem 1.2rem;
-      border-radius:20px;
-      background:rgba(10,19,39,0.7);
-      border:1px solid rgba(148,163,184,.2);
-      transition:all .3s;
-      position:relative;
-      overflow:hidden;
-    }
-    .pill::before{
-      content:"";
-      position:absolute;
-      top:0; left:0; right:0; height:3px;
-      background:var(--accent);
-      opacity:0;
-      transition:opacity .3s;
-    }
-    .pill.ideal::before{ background:var(--ok); opacity:1; }
-    .pill.warn::before{ background:var(--warn); opacity:1; }
-
-    .pill strong{
-      font-size:1.35rem;
-      display:block;
-      color:var(--accent);
-    }
-    .pill.ideal strong{ color:var(--ok); }
-    .pill.warn strong{ color:var(--warn); }
-
-    .sub{ font-size:.9rem; color:var(--muted); margin-top:.4rem; }
-
-    .legend{
-      margin-top:1.5rem;
-      display:flex; 
-      gap:1rem; 
-      flex-wrap:wrap; 
-      font-size:.85rem;
-      color:var(--muted);
-    }
-    .kpi{
-      display:flex; 
-      align-items:center; 
-      gap:.5rem;
-      padding:.5rem .8rem; 
-      background:rgba(9,16,34,.8); 
-      border-radius:12px;
-      border:1px solid rgba(148,163,184,.15);
-    }
-    .dot{
-      width:10px; height:10px; border-radius:50%;
-    }
-    .dot.ok{ background:var(--ok); box-shadow:0 0 10px rgba(34,197,94,.5); }
-    .dot.warn{ background:var(--warn); box-shadow:0 0 10px rgba(245,158,11,.5); }
-
-    footer{
-      text-align:center;
-      padding:2rem 1rem 1.5rem;
-      color:var(--muted);
-      font-size:.85rem;
-    }
-    .credit{
-      margin-top:1rem;
-      font-size:.75rem;
-      opacity:.7;
-    }
+    body{font-family:'Inter',system-ui,sans-serif;background:var(--gradient);background-attachment:fixed;color:var(--text);min-height:100dvh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+    header{text-align:center;padding:2.5rem 1rem 1.5rem;background:linear-gradient(to bottom,rgba(15,23,42,0.8),transparent);backdrop-filter:blur(10px)}
+    header h1{font-size:clamp(1.8rem,5vw,2.4rem);font-weight:700;background:linear-gradient(90deg,#22d3ee,#a5f3fc);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.4rem}
+    header p{color:var(--muted);font-size:.95rem;max-width:500px;margin:0 auto}
+    .container{max-width:1000px;margin:0 auto;padding:1rem;display:grid;gap:1.5rem}
+    @media(min-width:768px){.container{grid-template-columns:1fr 1fr}}
+    .card{background:rgba(17,24,39,0.75);border:1px solid rgba(148,163,184,0.15);border-radius:24px;padding:1.5rem;box-shadow:0 20px 40px rgba(0,0,0,0.4),0 0 20px rgba(34,211,238,0.08);backdrop-filter:blur(16px);transition:transform .3s,box-shadow .3s}
+    .card:hover{transform:translateY(-4px);box-shadow:0 25px 50px rgba(0,0,0,0.5)}
+    .card h2{font-size:1.35rem;font-weight:600;margin-bottom:1rem;color:var(--accent);display:flex;align-items:center;gap:.5rem}
+    .card h2::before{content:"";width:6px;height:100%;background:var(--accent);border-radius:3px}
+    label{display:block;font-size:.9rem;color:var(--muted);margin-bottom:.4rem}
+    input[type=time]{width:100%;padding:.75rem 1rem;border-radius:16px;border:1px solid rgba(148,163,184,.3);background:rgba(15,23,42,0.8);color:var(--text);font-size:1.1rem;backdrop-filter:blur(4px);transition:all .2s}
+    input[type=time]:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(34,211,238,.2)}
+    .actions{display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1rem}
+    button{padding:.75rem 1.2rem;border-radius:16px;border:none;font-weight:500;cursor:pointer;transition:all .25s;flex:1;min-width:140px;position:relative;overflow:hidden}
+    button::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);transform:translateX(-100%);transition:transform .6s}
+    button:hover::before{transform:translateX(100%)}
+    button.primary{background:linear-gradient(135deg,#22c55e,#16a34a);color:white;box-shadow:0 8px 20px rgba(34,197,94,.3)}
+    button.secondary{background:linear-gradient(135deg,rgba(34,211,238,.2),rgba(14,165,233,.15));border:1px solid rgba(34,211,238,.4);color:var(--text)}
+    button:hover{transform:translateY(-2px)}
+    .result{margin-top:1.5rem;display:grid;gap:1rem;grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+    .pill{padding:1rem 1.2rem;border-radius:20px;background:rgba(10,19,39,0.7);border:1px solid rgba(148,163,184,.2);transition:all .3s;position:relative;overflow:hidden}
+    .pill::before{content:"";position:absolute;top:0;left:0;right:0;height:4px;opacity:0;transition:opacity .3s}
+    .pill.ideal::before{background:var(--ok);opacity:1}
+    .pill.warn::before{background:var(--warn);opacity:1}
+    .pill strong{font-size:1.35rem;display:block;color:var(--accent)}
+    .pill.ideal strong{color:var(--ok)}
+    .pill.warn strong{color:var(--warn)}
+    .sub{font-size:.9rem;color:var(--muted);margin-top:.4rem}
+    .legend{margin:2rem auto 1rem;display:flex;gap:1rem;flex-wrap:wrap;justify-content:center;font-size:.85rem;color:var(--muted)}
+    .kpi{display:flex;align-items:center;gap:.5rem;padding:.5rem .8rem;background:rgba(9,16,34,.8);border-radius:12px;border:1px solid rgba(148,163,184,.15)}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .dot.ok{background:var(--ok);box-shadow:0 0 10px rgba(34,197,94,.5)}
+    .dot.warn{background:var(--warn);box-shadow:0 0 10px rgba(245,158,11,.5)}
+    footer{text-align:center;padding:2rem 1rem;color:var(--muted);font-size:.85rem}
   </style>
 </head>
 <body>
   <header>
     <h1>Kalkulator Siklus Tidur</h1>
-    <p>Rencanakan tidur & bangun agar selalu segar — berbasis siklus 90 menit + 15 menit terlelap</p>
+    <p>Hitung jam tidur & bangun ideal (90 menit/siklus + 15 menit terlelap)</p>
   </header>
 
   <div class="container">
-    <!-- Kiri: Dari jam bangun -->
     <section class="card">
       <h2>Jika mau bangun jam...</h2>
-      <div class="field">
-        <label>Jam bangun yang diinginkan</label>
-        <input type="time" id="wakeTime" value="07:00" />
-      </div>
+      <div><label>Jam bangun</label><input type="time" id="wakeTime" value="07:00"></div>
       <div class="actions">
         <button class="primary" id="calcBed">Rekomendasi Tidur</button>
         <button class="secondary" id="wakeToNow">+7.5 jam dari sekarang</button>
@@ -246,13 +72,9 @@
       <div id="bedResults" class="result" aria-live="polite"></div>
     </section>
 
-    <!-- Kanan: Dari jam tidur -->
     <section class="card">
       <h2>Jika mau tidur jam...</h2>
-      <div class="field">
-        <label>Jam mulai tidur</label>
-        <input type="time" id="bedTime" value="22:30" />
-      </div>
+      <div><label>Jam mulai tidur</label><input type="time" id="bedTime" value="22:30"></div>
       <div class="actions">
         <button class="primary" id="calcWake">Rekomendasi Bangun</button>
         <button class="secondary" id="sleepNow">Tidur Sekarang</button>
@@ -261,90 +83,57 @@
     </section>
   </div>
 
-  <div class="legend container">
+  <div class="legend">
     <div class="kpi"><span class="dot ok"></span>Ideal (7.5 jam – 5 siklus)</div>
-    <div class="kpi"><span class="dot warn"></span>Kurang dari 6 jam (kurang segar)</div>
+    <div class="kpi"><span class="dot warn"></span><6 jam (kurang segar)</div>
   </div>
 
   <footer>
-    <p>Catatan: ini hanya panduan umum. Kebutuhan tidur tiap orang bisa berbeda.</p>
-    <div class="credit">Dibuat dengan ❤️ untuk kamu yang ingin selalu bangun segar</div>
+    <p>Catatan: panduan umum. Kebutuhan tidur tiap orang bisa berbeda.</p>
   </footer>
 
-  <!-- Script tetap sama, cuma ditambah sedikit efek visual -->
+  <!-- Service Worker Registration -->
   <script>
-    const CYCLE_MIN = 90;
-    const SLEEP_ONSET_MIN = 15;
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(reg => console.log('SW registered', reg))
+          .catch(err => console.log('SW registration failed', err));
+      });
+    }
 
-    const pad2 = n => String(n).padStart(2, '0');
-    const toMinutes = t => t ? t.split(':').map(Number).reduce((h,m)=>h*60+m) : null;
-    const fromMinutes = total => {
-      total = ((total % 1440) + 1440) % 1440;
-      return `${pad2(Math.floor(total/60))}:${pad2(total%60)}`;
-    };
-    const fmt = t => {
-      const [h,m] = t.split(':').map(Number);
-      const ampm = h < 12 ? 'AM' : 'PM';
-      const h12 = h % 12 || 12;
-      return `${t} <small style="opacity:.7">(${h12}:${pad2(m)} ${ampm})</small>`;
-    };
-    const durationText = c => {
-      const h = c * 1.5;
-      return h === Math.floor(h) ? `${h} jam (${c} siklus)` : `${h.toFixed(1)} jam (${c} siklus)`;
-    };
+    // Logic kalkulator (sama seperti sebelumnya, cuma lebih ringkas)
+    const C = 90, O = 15;
+    const pad = n => n.toString().padStart(2,'0');
+    const toMin = t => t ? t.split(':').reduce((h,m)=>h*60+ +m) : null;
+    const fromMin = m => { m=((m%1440)+1440)%1440; return `${pad(m/60|0)}:${pad(m%60)}`; };
+    const fmt = t => { const [h,m]=t.split(':'); const ampm=h<12?'AM':'PM'; const h12=h%12||12; return `${t} <small style="opacity:.7">(${h12}:${m} ${ampm})</small>`; };
+    const dur = c => c*1.5===Math.floor(c*1.5) ? `${c*1.5} jam` : `${(c*1.5).toFixed(1)} jam`;
 
-    const calcBedtimes = wake => [5,4,3,2].map(c=>({
-      time: wake - c*90 - 15,
-      cycles: c,
-      ideal: c===5,
-      warn: c*1.5 < 6
-    }));
+    const calcBed = w => [5,4,3,2].map(c=>({t:w-c*90-O,c,ideal:c===5,warn:c*1.5<6}));
+    const calcWake = b => [6,5,4,3].map(c=>({t:b+O+c*90,c,ideal:c===5,warn:c*1.5<6}));
 
-    const calcWakeTimes = bed => [6,5,4,3].map(c=>({
-      time: bed + 15 + c*90,
-      cycles: c,
-      ideal: c===5,
-      warn: c*1.5 < 6
-    }));
-
-    const render = (container, items, type) => {
-      container.innerHTML = '';
-      items.forEach(i => {
-        const pill = document.createElement('div');
-        pill.className = `pill ${i.ideal?'ideal':''} ${i.warn?'warn':''}`;
-        pill.innerHTML = `
-          <strong>${type==='bed'?'Tidur':'Bangun'} ${fmt(fromMinutes(i.time))}</strong>
-          <div class="sub">≈ ${durationText(i.cycles)}</div>
-        `;
-        container.appendChild(pill);
+    const render = (el, items, type) => {
+      el.innerHTML = '';
+      items.forEach(i=>{
+        const div = document.createElement('div');
+        div.className = `pill ${i.ideal?'ideal':''} ${i.warn?'warn':''}`;
+        div.innerHTML = `<strong>${type==='bed'?'Tidur':'Bangun'} ${fmt(fromMin(i.t))}</strong><div class="sub">≈ ${dur(i.c)} (${i.c} siklus)</div>`;
+        el.appendChild(div);
       });
     };
 
-    // Event listeners
-    document.getElementById('calcBed').onclick = () => {
-      const m = toMinutes(document.getElementById('wakeTime').value);
-      if(!m) return bedResults.innerHTML = '<div class="pill">Pilih jam bangun dulu ya</div>';
-      render(bedResults, calcBedtimes(m), 'bed');
-    };
-    document.getElementById('calcWake').onclick = () => {
-      const m = toMinutes(document.getElementById('bedTime').value);
-      if(!m) return wakeResults.innerHTML = '<div class="pill">Pilih jam tidur dulu ya</div>';
-      render(wakeResults, calcWakeTimes(m), 'wake');
-    };
+    document.getElementById('calcBed').onclick = () => render(bedResults, calcBed(toMin(wakeTime.value)), 'bed');
+    document.getElementById('calcWake').onclick = () => render(wakeResults, calcWake(toMin(bedTime.value)), 'wake');
     document.getElementById('wakeToNow').onclick = () => {
-      const now = new Date().getHours()*60 + new Date().getMinutes() + 7.5*60;
-      render(bedResults, calcBedtimes(now), 'bed');
+      const now = new Date(); render(bedResults, calcBed(now.getHours()*60 + now.getMinutes() + 450), 'bed');
     };
     document.getElementById('sleepNow').onclick = () => {
-      const now = new Date().getHours()*60 + new Date().getMinutes();
-      render(wakeResults, calcWakeTimes(now), 'wake');
+      const now = new Date(); render(wakeResults, calcWake(now.getHours()*60 + now.getMinutes()), 'wake');
     };
 
-    // Auto calculate saat buka (biar langsung kelihatan hasilnya)
-    window.onload = () => {
-      document.getElementById('calcBed').click();
-      document.getElementById('calcWake').click();
-    };
+    // Auto hitung saat buka
+    window.onload = () => { document.getElementById('calcBed').click(); document.getElementById('calcWake').click(); };
   </script>
 </body>
 </html>
