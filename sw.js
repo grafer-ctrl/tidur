@@ -1,21 +1,24 @@
-const CACHE_NAME = 'sleep-optimizer-v1';
-const urlsToCache = [
+const CACHE_NAME = 'sleep-opt-v1';
+const ASSETS = [
   '/',
   '/index.html',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  // Tambahkan file css atau js lain jika ada
 ];
 
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(urlsToCache))
+// Install Service Worker
+self.addEventListener('install', (e) => {
+  e.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS);
+    })
   );
 });
 
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
+// Fetch Assets (Agar bisa offline)
+self.addEventListener('fetch', (e) => {
+  e.respondWith(
+    caches.match(e.request).then((response) => {
+      return response || fetch(e.request);
+    })
   );
 });
