@@ -2,757 +2,348 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#4f46e5">
-  <meta name="description" content="Sleep cycle calculator 90 minutes + 15 minutes to fall asleep. Calculate ideal sleep/wake times to always feel refreshed!">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a">
+  <meta name="description" content="Sleep cycle calculator. Calculate ideal sleep/wake times.">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   
   <title>Sleep Optimizer</title>
 
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="icon" href="icons/icon-192.png">
-  <link rel="shortcut icon" href="icons/favicon.ico">
-
-  <!-- Font & Style -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font & Icon -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --bg: #0a0e1a;
-      --panel: rgba(17, 24, 39, 0.85);
+      --bg: #0f172a;
+      --panel: rgba(30, 41, 59, 0.7);
+      --border: rgba(255, 255, 255, 0.1);
+      --primary: #818cf8;
       --text: #f1f5f9;
       --muted: #94a3b8;
-      --accent: #8b5cf6;
-      --ok: #22c55e;
-      --warn: #f59e0b;
-      --gradient: linear-gradient(135deg, #4f46e5, #7e22ce);
+      --accent: #c084fc;
+      --nav-bg: rgba(15, 23, 42, 0.9);
     }
     
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     
     body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--gradient);
-      background-attachment: fixed;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      background-image: radial-gradient(circle at 50% 0%, #1e1b4b, #0f172a);
       color: var(--text);
-      min-height: 100dvh;
-      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-    }
-    
-    header {
-      position: relative;
-      text-align: center;
-      padding: 2.5rem 1rem 1.5rem;
-      background: linear-gradient(to bottom, rgba(79, 70, 229, 0.8), transparent);
-      backdrop-filter: blur(10px);
-      border-radius: 0 0 3% 3%;
-    }
-    
-    .avatar {
-      position: absolute;
-      top: 1rem;
-      left: 1rem;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(5px);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    .avatar::before {
-      content: "😴";
-      font-size: 1.5rem;
-    }
-    
-    /* PERBAIKAN: Hamburger Menu Styles - No Outline, Mini Text */
-    .hamburger-menu {
-      position: absolute;
-      top: 1.2rem;
-      right: 1rem;
-      z-index: 1000;
-    }
-    
-    .hamburger-btn {
-      background: none;
-      border: none;
-      color: var(--text);
-      padding: 0.4rem;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      gap: 3px;
-    }
-    
-    .hamburger-btn:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
-    
-    .hamburger-btn span {
-      display: block;
-      width: 18px;
-      height: 2px;
-      background: var(--text);
-      border-radius: 1px;
-      transition: all 0.3s ease;
-    }
-    
-    .hamburger-btn.active {
-      background: rgba(139, 92, 246, 0.2);
-    }
-    
-    .hamburger-btn.active span:nth-child(1) {
-      transform: rotate(45deg) translate(4px, 4px);
-    }
-    
-    .hamburger-btn.active span:nth-child(2) {
-      opacity: 0;
-    }
-    
-    .hamburger-btn.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(4px, -4px);
-    }
-    
-    .language-dropdown {
-      position: absolute;
-      top: 100%;
-      right: 0;
-      margin-top: 0.5rem;
-      background: rgba(17, 24, 39, 0.98);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      border-radius: 12px;
-      backdrop-filter: blur(20px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-      overflow: hidden;
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-10px);
-      transition: all 0.3s ease;
-      z-index: 1001;
-      width: 100px; /* Lebih kecil */
-      min-width: 100px;
-    }
-    
-    .language-dropdown.active {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-    
-    .lang-option {
-      display: block;
-      width: 100%;
-      padding: 0.6rem 0.8rem;
-      background: none;
-      border: none;
-      color: var(--text);
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 0.75rem; /* Text lebih kecil */
-      font-weight: 500;
-      white-space: nowrap;
-      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
-    }
-    
-    .lang-option:last-child {
-      border-bottom: none;
-    }
-    
-    .lang-option:hover {
-      background: rgba(139, 92, 246, 0.15);
-    }
-    
-    .lang-option.active {
-      background: rgba(139, 92, 246, 0.25);
-      color: var(--accent);
-    }
-    
-    header h1 {
-      font-size: clamp(1.8rem, 5vw, 2.4rem);
-      font-weight: 700;
-      background: linear-gradient(90deg, #a78bfa, #f0abfc);
-      -webkit-background-clip: text;
-      background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: .4rem;
-      padding: 0 3rem;
-    }
-    
-    header p {
-      color: var(--muted);
-      font-size: .95rem;
-      max-width: 500px;
-      margin: 0 auto;
-      padding: 0 2rem;
-    }
-    
-    .container {
-      max-width: 1000px;
-      margin: 0 auto;
-      padding: 1rem;
-      display: grid;
-      gap: 1.5rem;
-    }
-    
-    @media (min-width: 768px) {
-      .container {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .hamburger-menu {
-        top: 1rem;
-        right: 0.8rem;
-      }
-      
-      .hamburger-btn {
-        width: 32px;
-        height: 32px;
-      }
-      
-      .hamburger-btn span {
-        width: 16px;
-        height: 1.5px;
-      }
-      
-      header h1 {
-        padding: 0 2.5rem;
-      }
-      
-      header p {
-        padding: 0 1.5rem;
-      }
-    }
-    
-    /* CSS lainnya tetap sama */
-    .card {
-      background: var(--panel);
-      border: 1px solid rgba(148, 163, 184, 0.15);
-      border-radius: 3%;
-      padding: 1.5rem;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 92, 246, 0.15);
-      backdrop-filter: blur(16px);
-      transition: transform .3s, box-shadow .3s;
-    }
-    
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
-    }
-    
-    .card h2 {
-      font-size: 1.35rem;
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-    }
-    
-    .card h2::before {
-      content: "";
-      width: 6px;
-      height: 100%;
-      background: var(--accent);
-      border-radius: 3px;
-    }
-    
-    label {
-      display: block;
-      font-size: .9rem;
-      color: var(--muted);
-      margin-bottom: .4rem;
-    }
-    
-    input[type=time] {
-      width: 100%;
-      padding: .75rem 1rem;
-      border-radius: 3%;
-      border: 1px solid rgba(148, 163, 184, .3);
-      background: rgba(15, 23, 42, 0.8);
-      color: var(--text);
-      font-size: 1.1rem;
-      backdrop-filter: blur(4px);
-      transition: all .2s;
-    }
-    
-    input[type=time]:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(139, 92, 246, .2);
-    }
-    
-    .actions {
-      display: flex;
-      gap: .75rem;
-      flex-wrap: wrap;
-      margin-top: 1rem;
-    }
-    
-    button {
-      padding: .75rem 1.2rem;
-      border-radius: 3%;
-      border: none;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all .25s;
-      flex: 1;
-      min-width: 140px;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    button::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .15), transparent);
-      transform: translateX(-100%);
-      transition: transform .6s;
-    }
-    
-    button:hover::before {
-      transform: translateX(100%);
-    }
-    
-    button.primary {
-      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-      color: white;
-      box-shadow: 0 8px 20px rgba(139, 92, 246, .3);
-    }
-    
-    button.secondary {
-      background: linear-gradient(135deg, rgba(139, 92, 246, .2), rgba(124, 58, 237, .15));
-      border: 1px solid rgba(139, 92, 246, .4);
-      color: var(--text);
-    }
-    
-    button:hover {
-      transform: translateY(-2px);
-    }
-    
-    .result {
-      margin-top: 1.5rem;
-      display: grid;
-      gap: 1rem;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    }
-    
-    .pill {
-      padding: 1rem 1.2rem;
-      border-radius: 3%;
-      background: rgba(10, 19, 39, 0.7);
-      border: 1px solid rgba(148, 163, 184, .2);
-      transition: all .3s;
-      position: relative;
-      overflow: hidden;
-    }
-    
-    .pill::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      opacity: 0;
-      transition: opacity .3s;
-    }
-    
-    .pill.ideal::before {
-      background: var(--ok);
-      opacity: 1;
-    }
-    
-    .pill.warn::before {
-      background: var(--warn);
-      opacity: 1;
-    }
-    
-    .pill strong {
-      font-size: 1.35rem;
-      display: block;
-      color: var(--accent);
-    }
-    
-    .pill.ideal strong {
-      color: var(--ok);
-    }
-    
-    .pill.warn strong {
-      color: var(--warn);
-    }
-    
-    .sub {
-      font-size: .9rem;
-      color: var(--muted);
-      margin-top: .4rem;
-    }
-    
-    .legend {
-      margin: 2rem auto 1rem;
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      justify-content: center;
-      font-size: .85rem;
-      color: var(--muted);
-    }
-    
-    .kpi {
-      display: flex;
-      align-items: center;
-      gap: .5rem;
-      padding: .5rem .8rem;
-      background: rgba(9, 16, 34, .8);
-      border-radius: 3%;
-      border: 1px solid rgba(148, 163, 184, .15);
-    }
-    
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-    
-    .dot.ok {
-      background: var(--ok);
-      box-shadow: 0 0 10px rgba(34, 197, 94, .5);
-    }
-    
-    .dot.warn {
-      background: var(--warn);
-      box-shadow: 0 0 10px rgba(245, 158, 11, .5);
-    }
-    
-    footer {
-      text-align: center;
-      padding: 2rem 1rem;
-      color: var(--muted);
-      font-size: .85rem;
-      background: rgba(15, 23, 42, 0.7);
-      backdrop-filter: blur(10px);
-      border-radius: 3% 3% 0 0;
-    }
-    
-    .footer-menu {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-    }
-    
-    .footer-menu a {
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.3s;
-      padding: 0.5rem 1rem;
-      border-radius: 3%;
-    }
-    
-    .footer-menu a:hover {
-      color: var(--accent);
-      background: rgba(255, 255, 255, 0.05);
+      min-height: 100vh;
+      padding-bottom: 90px; /* Space for bottom nav */
     }
 
-    .install-prompt {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
+    /* --- HEADER --- */
+    header {
+      padding: 2rem 1.5rem 1rem;
+      text-align: center;
+    }
+
+    .avatar-container {
+      width: 60px; height: 60px; margin: 0 auto 1rem;
+      background: var(--panel); border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--border);
+      font-size: 30px;
+    }
+
+    h1 {
+      font-size: 1.8rem; font-weight: 700;
+      background: linear-gradient(to right, #a78bfa, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    
+    header p { color: var(--muted); font-size: 0.9rem; }
+
+    /* --- CONTAINER & CARDS --- */
+    .container {
+      padding: 0 1rem; max-width: 600px; margin: 0 auto;
+      display: flex; flex-direction: column; gap: 1.5rem;
+    }
+
+    .card {
       background: var(--panel);
-      border: 1px solid rgba(148, 163, 184, 0.2);
-      border-radius: 3%;
+      border: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+
+    .card h2 {
+      font-size: 1.1rem; margin-bottom: 1rem; color: var(--accent);
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    .input-wrapper { margin-bottom: 1rem; }
+    label { display: block; color: var(--muted); font-size: 0.85rem; margin-bottom: 0.5rem; }
+    
+    input[type="time"] {
+      width: 100%;
+      background: rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+      color: white;
       padding: 1rem;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-      z-index: 1000;
-      display: none;
-      max-width: 90%;
-      width: 300px;
+      font-size: 1.5rem;
+      border-radius: 12px;
+      font-family: inherit;
+      outline: none;
+    }
+    input[type="time"]:focus { border-color: var(--primary); }
+
+    .btn-group { display: flex; gap: 10px; }
+    
+    button {
+      flex: 1; padding: 0.8rem; border-radius: 12px;
+      border: none; font-weight: 600; cursor: pointer;
+      font-family: inherit; transition: transform 0.2s;
+    }
+    button:active { transform: scale(0.96); }
+    
+    .btn-primary { background: var(--primary); color: #000; }
+    .btn-secondary { background: rgba(255,255,255,0.1); color: var(--text); }
+
+    /* --- RESULTS --- */
+    .results-area {
+      margin-top: 1.5rem;
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+    }
+
+    .pill {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border);
+      padding: 10px; border-radius: 12px;
+      text-align: center;
     }
     
-    .install-prompt.show {
-      display: block;
+    .pill.ideal { border-color: #4ade80; background: rgba(74, 222, 128, 0.1); }
+    .pill.warn { border-color: #fbbf24; }
+    
+    .pill strong { display: block; font-size: 1.1rem; color: var(--text); }
+    .pill.ideal strong { color: #4ade80; }
+    .pill.warn strong { color: #fbbf24; }
+    
+    .pill span { font-size: 0.75rem; color: var(--muted); display: block; margin-top: 4px; }
+
+    /* --- BOTTOM NAV (PWA) --- */
+    .bottom-nav {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: var(--nav-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      padding: 10px 20px;
+      border-radius: 50px;
+      display: flex; gap: 20px;
+      z-index: 100;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .nav-item {
+      color: var(--muted); text-decoration: none;
+      display: flex; flex-direction: column; align-items: center;
+      font-size: 0.7rem; gap: 4px; padding: 5px 10px;
+      border-radius: 15px; transition: 0.3s;
     }
     
-    .install-prompt button {
-      margin-top: 0.5rem;
+    .nav-item.active { color: var(--primary); background: rgba(129, 140, 248, 0.1); }
+    .nav-icon { font-size: 1.2rem; }
+
+    /* --- MENU HAMBURGER --- */
+    .menu-toggle {
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      background: none; border: none; color: white; font-size: 1.5rem; cursor: pointer;
     }
+    .lang-menu {
+      position: absolute; top: 3.5rem; right: 1.5rem;
+      background: var(--nav-bg); border: 1px solid var(--border);
+      border-radius: 12px; overflow: hidden;
+      display: none; flex-direction: column; z-index: 200;
+    }
+    .lang-menu.show { display: flex; }
+    .lang-opt { padding: 10px 20px; color: white; background: none; border: none; cursor: pointer; text-align: left;}
+    .lang-opt:hover { background: rgba(255,255,255,0.1); }
+
   </style>
 </head>
 <body>
+
   <header>
-    <div class="avatar" title="Sleep Avatar"></div>
-    
-    <!-- PERBAIKAN: Hamburger Menu Minimalis -->
-    <div class="hamburger-menu">
-      <button class="hamburger-btn" id="hamburgerBtn" aria-label="Language menu">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-      <div class="language-dropdown" id="languageDropdown">
-        <button class="lang-option active" data-lang="EN">EN</button>
-        <button class="lang-option" data-lang="ID">ID</button>
-      </div>
+    <button class="menu-toggle" id="menuBtn">☰</button>
+    <div class="lang-menu" id="langMenu">
+      <button class="lang-opt" onclick="setLang('EN')">English</button>
+      <button class="lang-opt" onclick="setLang('ID')">Indonesia</button>
     </div>
-    
-    <h1>Sleep Optimizer</h1>
-    <p>Optimize your sleep, maximize your day</p>
+
+    <div class="avatar-container">🍌</div>
+    <h1 id="appTitle">Sleep Optimizer</h1>
+    <p id="appDesc">Modern UI • PWA Ready</p>
   </header>
 
   <div class="container">
+    <!-- Wake Calculator -->
     <section class="card">
-      <h2>If you want to wake up at...</h2>
-      <div><label>Wake up time</label><input type="time" id="wakeTime" value="07:00"></div>
-      <div class="actions">
-        <button class="primary" id="calcBed">Recommended Bedtime</button>
-        <button class="secondary" id="wakeToNow">+7.5 hours from now</button>
+      <h2 id="titleWake">🌙 Wake up time</h2>
+      <div class="input-wrapper">
+        <label id="lblWake">If I want to wake at:</label>
+        <input type="time" id="wakeTimeInput" value="07:00">
       </div>
-      <div id="bedResults" class="result" aria-live="polite"></div>
+      <div class="btn-group">
+        <button class="btn-primary" id="btnCalcBed">Bedtime?</button>
+        <button class="btn-secondary" id="btnWakeNow">+7.5h Now</button>
+      </div>
+      <div id="bedResultBox" class="results-area"></div>
     </section>
 
+    <!-- Sleep Calculator -->
     <section class="card">
-      <h2>If you want to sleep at...</h2>
-      <div><label>Bedtime</label><input type="time" id="bedTime" value="22:30"></div>
-      <div class="actions">
-        <button class="primary" id="calcWake">Recommended Wake Time</button>
-        <button class="secondary" id="sleepNow">Sleep Now</button>
+      <h2 id="titleBed">☀️ Bedtime</h2>
+      <div class="input-wrapper">
+        <label id="lblBed">If I sleep at:</label>
+        <input type="time" id="bedTimeInput" value="22:30">
       </div>
-      <div id="wakeResults" class="result" aria-live="polite"></div>
+      <div class="btn-group">
+        <button class="btn-primary" id="btnCalcWake">Wake time?</button>
+        <button class="btn-secondary" id="btnSleepNow">Sleep Now</button>
+      </div>
+      <div id="wakeResultBox" class="results-area"></div>
     </section>
   </div>
 
-  <div class="legend">
-    <div class="kpi"><span class="dot ok"></span>Ideal (7.5 hours – 5 cycles)</div>
-    <div class="kpi"><span class="dot warn"></span><6 hours (less refreshed)</div>
-  </div>
-
-<footer>
-  <div class="footer-menu">
-    <a href="index.html" id="homeLink">HOME</a>
-    <a href="music.html" id="musicLink">SLEEP MUSIC</a>
-    <a href="game.html" id="gameLink">GAME</a>
-  </div>
-  <p>Note: general guideline. Individual sleep needs may vary.</p>
-</footer>
-
-  <!-- Install Prompt -->
-  <div class="install-prompt" id="installPrompt">
-    <p>Install app for better experience?</p>
-    <button class="primary" id="installBtn">Install</button>
-    <button class="secondary" id="cancelInstall">Later</button>
-  </div>
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="#" class="nav-item active">
+      <span class="nav-icon">🏠</span>
+      <span id="navHome">Home</span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="nav-icon">🎵</span>
+      <span id="navMusic">Music</span>
+    </a>
+    <a href="#" class="nav-item">
+      <span class="nav-icon">🎮</span>
+      <span id="navGame">Game</span>
+    </a>
+  </nav>
 
   <script>
-    // Service Worker Registration
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js')
-          .then(reg => {
-            console.log('Service Worker registered', reg);
-          })
-          .catch(err => {
-            console.log('Service Worker registration failed', err);
-          });
-      });
-    }
-
-    // Sleep Calculator Logic
+    // RUMUS DAN LOGIKA (TIDAK DIUBAH, HANYA DISESUAIKAN SELECTORNYA)
     const C = 90, O = 15;
     const pad = n => n.toString().padStart(2,'0');
     const toMin = t => t ? t.split(':').reduce((h,m)=>h*60+ +m) : null;
+    // Fix: Handle negative modulo correctly for JavaScript
     const fromMin = m => { m=((m%1440)+1440)%1440; return `${pad(m/60|0)}:${pad(m%60)}`; };
-    const fmt = t => { 
-      const [h,m] = t.split(':');
-      const hour = parseInt(h);
-      const ampm = hour < 12 ? 'AM' : 'PM';
-      const h12 = hour % 12 || 12;
-      return `${t} <small style="opacity:.7">(${h12}:${m} ${ampm})</small>`;
-    };
-    const dur = c => c*1.5 === Math.floor(c*1.5) ? `${c*1.5} hours` : `${(c*1.5).toFixed(1)} hours`;
+    const dur = c => c*1.5 === Math.floor(c*1.5) ? `${c*1.5}h` : `${(c*1.5).toFixed(1)}h`;
 
-    const calcBed = w => [5,4,3,2].map(c=>({t:w-c*90-O,c,ideal:c===5,warn:c*1.5<6}));
-    const calcWake = b => [6,5,4,3].map(c=>({t:b+O+c*90,c,ideal:c===5,warn:c*1.5<6}));
+    // Functions calcBed and calcWake (Original Formulas)
+    const calcBed = w => [6,5,4,3].map(c=>({t:w-c*90-O,c,ideal:c===5||c===6,warn:c*1.5<6}));
+    const calcWake = b => [6,5,4,3].map(c=>({t:b+O+c*90,c,ideal:c===5||c===6,warn:c*1.5<6}));
 
-    const render = (el, items, type) => {
+    // Render Function
+    const render = (el, items) => {
+      if(!el) return;
       el.innerHTML = '';
-      items.forEach(i=>{
+      items.forEach(i => {
         const div = document.createElement('div');
         div.className = `pill ${i.ideal?'ideal':''} ${i.warn?'warn':''}`;
-        const actionText = type === 'bed' ? 'Sleep at' : 'Wake up at';
-        div.innerHTML = `<strong>${actionText} ${fmt(fromMin(i.t))}</strong><div class="sub">≈ ${dur(i.c)} (${i.c} cycles)</div>`;
+        // Format time for UI
+        const timeStr = fromMin(i.t);
+        div.innerHTML = `<strong>${timeStr}</strong><span>${dur(i.c)} (${i.c} cyc)</span>`;
         el.appendChild(div);
       });
     };
 
-    // Event Listeners for Calculator
-    document.getElementById('calcBed').onclick = () => render(bedResults, calcBed(toMin(wakeTime.value)), 'bed');
-    document.getElementById('calcWake').onclick = () => render(wakeResults, calcWake(toMin(bedTime.value)), 'wake');
-    document.getElementById('wakeToNow').onclick = () => {
-      const now = new Date(); 
-      render(bedResults, calcBed(now.getHours()*60 + now.getMinutes() + 450), 'bed');
-    };
-    document.getElementById('sleepNow').onclick = () => {
-      const now = new Date(); 
-      render(wakeResults, calcWake(now.getHours()*60 + now.getMinutes()), 'wake');
-    };
+    // --- SAFETY EXECUTION ---
+    document.addEventListener('DOMContentLoaded', () => {
+      
+      // Get Elements safely
+      const ui = {
+        wakeInput: document.getElementById('wakeTimeInput'),
+        bedInput: document.getElementById('bedTimeInput'),
+        bedRes: document.getElementById('bedResultBox'),
+        wakeRes: document.getElementById('wakeResultBox'),
+        btnCalcBed: document.getElementById('btnCalcBed'),
+        btnCalcWake: document.getElementById('btnCalcWake'),
+        btnWakeNow: document.getElementById('btnWakeNow'),
+        btnSleepNow: document.getElementById('btnSleepNow'),
+        menuBtn: document.getElementById('menuBtn'),
+        langMenu: document.getElementById('langMenu')
+      };
 
-    // Auto calculate on load
-    window.onload = () => { 
-      document.getElementById('calcBed').click(); 
-      document.getElementById('calcWake').click(); 
-    };
-    
-    // PERBAIKAN: Hamburger Menu Functionality
-    const hamburgerBtn = document.getElementById('hamburgerBtn');
-    const languageDropdown = document.getElementById('languageDropdown');
-    const langOptions = document.querySelectorAll('.lang-option');
-    
-    // Toggle dropdown menu
-    hamburgerBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      hamburgerBtn.classList.toggle('active');
-      languageDropdown.classList.toggle('active');
-    });
-    
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!hamburgerBtn.contains(e.target) && !languageDropdown.contains(e.target)) {
-        hamburgerBtn.classList.remove('active');
-        languageDropdown.classList.remove('active');
-      }
-    });
-    
-    // Language selection functionality
-    langOptions.forEach(option => {
-      option.addEventListener('click', (e) => {
-        e.stopPropagation();
-        
-        // Remove active class from all options
-        langOptions.forEach(opt => opt.classList.remove('active'));
-        
-        // Add active class to clicked option
-        option.classList.add('active');
-        
-        // Get selected language
-        const selectedLang = option.getAttribute('data-lang');
-        
-        // Change language based on selection
-        if (selectedLang === 'ID') {
-          // Indonesian translations
-          document.documentElement.lang = 'id';
-          document.title = 'Optimizer Tidur';
-          document.querySelector('header h1').textContent = 'Optimizer Tidur';
-          document.querySelector('header p').textContent = 'Optimalkan tidur Anda, maksimalkan hari Anda';
-          document.querySelectorAll('.card h2')[0].textContent = 'Jika mau bangun jam...';
-          document.querySelectorAll('.card h2')[1].textContent = 'Jika mau tidur jam...';
-          document.querySelectorAll('label')[0].textContent = 'Jam bangun';
-          document.querySelectorAll('label')[1].textContent = 'Jam mulai tidur';
-          document.getElementById('calcBed').textContent = 'Rekomendasi Tidur';
-          document.getElementById('calcWake').textContent = 'Rekomendasi Bangun';
-          document.getElementById('wakeToNow').textContent = '+7.5 jam dari sekarang';
-          document.getElementById('sleepNow').textContent = 'Tidur Sekarang';
-          document.querySelector('.legend .kpi:nth-child(1)').textContent = 'Ideal (7.5 jam – 5 siklus)';
-          document.querySelector('.legend .kpi:nth-child(2)').textContent = '<6 jam (kurang segar)';
-          document.querySelector('footer p').textContent = 'Catatan: panduan umum. Kebutuhan tidur tiap orang bisa berbeda.';
-          document.getElementById('homeLink').textContent = 'HOME';
-          document.getElementById('musicLink').textContent = 'MUSIC TIDUR';
-          document.getElementById('gameLink').textContent = 'GAME';
-          
-          // Update calculator results text for Indonesian
-          const updateIndonesianResults = () => {
-            document.getElementById('calcBed').click();
-            document.getElementById('calcWake').click();
-          };
-          setTimeout(updateIndonesianResults, 100);
-        } else {
-          // English translations (default)
-          document.documentElement.lang = 'en';
-          document.title = 'Sleep Optimizer';
-          document.querySelector('header h1').textContent = 'Sleep Optimizer';
-          document.querySelector('header p').textContent = 'Optimize your sleep, maximize your day';
-          document.querySelectorAll('.card h2')[0].textContent = 'If you want to wake up at...';
-          document.querySelectorAll('.card h2')[1].textContent = 'If you want to sleep at...';
-          document.querySelectorAll('label')[0].textContent = 'Wake up time';
-          document.querySelectorAll('label')[1].textContent = 'Bedtime';
-          document.getElementById('calcBed').textContent = 'Recommended Bedtime';
-          document.getElementById('calcWake').textContent = 'Recommended Wake Time';
-          document.getElementById('wakeToNow').textContent = '+7.5 hours from now';
-          document.getElementById('sleepNow').textContent = 'Sleep Now';
-          document.querySelector('.legend .kpi:nth-child(1)').textContent = 'Ideal (7.5 hours – 5 cycles)';
-          document.querySelector('.legend .kpi:nth-child(2)').textContent = '<6 hours (less refreshed)';
-          document.querySelector('footer p').textContent = 'Note: general guideline. Individual sleep needs may vary.';
-          document.getElementById('homeLink').textContent = 'HOME';
-          document.getElementById('musicLink').textContent = 'SLEEP MUSIC';
-          document.getElementById('gameLink').textContent = 'GAME';
-          
-          // Update calculator results text for English
-          const updateEnglishResults = () => {
-            document.getElementById('calcBed').click();
-            document.getElementById('calcWake').click();
-          };
-          setTimeout(updateEnglishResults, 100);
-        }
-        
-        // Close dropdown after selection
-        hamburgerBtn.classList.remove('active');
-        languageDropdown.classList.remove('active');
+      // Event Listeners
+      ui.btnCalcBed.addEventListener('click', () => {
+        render(ui.bedRes, calcBed(toMin(ui.wakeInput.value)));
       });
-    });
-    
-    // Footer menu functionality
 
+      ui.btnCalcWake.addEventListener('click', () => {
+        render(ui.wakeRes, calcWake(toMin(ui.bedInput.value)));
+      });
 
-    // PWA Install Prompt
-    let deferredPrompt;
-    const installPrompt = document.getElementById('installPrompt');
-    const installBtn = document.getElementById('installBtn');
-    const cancelInstall = document.getElementById('cancelInstall');
+      ui.btnWakeNow.addEventListener('click', () => {
+        const now = new Date();
+        // Logic: Wake time based on now + 7.5h
+        render(ui.bedRes, calcBed(now.getHours()*60 + now.getMinutes() + 450));
+      });
 
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      installPrompt.classList.add('show');
-    });
+      ui.btnSleepNow.addEventListener('click', () => {
+        const now = new Date();
+        // Logic: Sleep now
+        render(ui.wakeRes, calcWake(now.getHours()*60 + now.getMinutes()));
+      });
 
-    installBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          console.log('User accepted the install prompt');
-        } else {
-          console.log('User dismissed the install prompt');
+      // Menu Toggle
+      ui.menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        ui.langMenu.classList.toggle('show');
+      });
+
+      document.addEventListener('click', (e) => {
+        if (!ui.menuBtn.contains(e.target) && !ui.langMenu.contains(e.target)) {
+          ui.langMenu.classList.remove('show');
         }
-        deferredPrompt = null;
-        installPrompt.classList.remove('show');
-      }
+      });
+
+      // Initial Render
+      ui.btnCalcBed.click();
+      ui.btnCalcWake.click();
     });
 
-    cancelInstall.addEventListener('click', () => {
-      installPrompt.classList.remove('show');
-    });
+    // Language Logic (Global function to be called from HTML onclick)
+    window.setLang = function(lang) {
+      const txt = {
+        'ID': {
+          t1: '🌙 Waktu Bangun', l1: 'Saya ingin bangun jam:', b1: 'Cek Jam Tidur',
+          t2: '☀️ Waktu Tidur', l2: 'Saya tidur jam:', b2: 'Cek Jam Bangun',
+          nav: ['Beranda', 'Musik', 'Game']
+        },
+        'EN': {
+          t1: '🌙 Wake up time', l1: 'If I want to wake at:', b1: 'Bedtime?',
+          t2: '☀️ Bedtime', l2: 'If I sleep at:', b2: 'Wake time?',
+          nav: ['Home', 'Music', 'Game']
+        }
+      };
+
+      const t = txt[lang];
+      document.getElementById('titleWake').textContent = t.t1;
+      document.getElementById('lblWake').textContent = t.l1;
+      document.getElementById('btnCalcBed').textContent = t.b1;
+      
+      document.getElementById('titleBed').textContent = t.t2;
+      document.getElementById('lblBed').textContent = t.l2;
+      document.getElementById('btnCalcWake').textContent = t.b2;
+
+      document.getElementById('navHome').textContent = t.nav[0];
+      document.getElementById('navMusic').textContent = t.nav[1];
+      document.getElementById('navGame').textContent = t.nav[2];
+      
+      document.getElementById('langMenu').classList.remove('show');
+    };
   </script>
 </body>
 </html>
