@@ -2,663 +2,288 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#4f46e5">
-  <meta name="description" content="Relaxing sleep music for better sleep quality">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a">
+  <title>Sleep Sounds</title>
   
-  <title>Sleep Music - Sleep Optimizer</title>
-
-  <!-- PWA Manifest -->
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="icon" href="icons/icon-192.png">
-
-  <!-- Font & Style -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font & Icon -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
   <style>
     :root {
-      --bg: #0a0e1a;
-      --panel: rgba(17, 24, 39, 0.85);
+      --bg: #0f172a;
+      --panel: rgba(30, 41, 59, 0.7);
+      --border: rgba(255, 255, 255, 0.1);
+      --primary: #818cf8;
+      --active-glow: rgba(129, 140, 248, 0.4);
       --text: #f1f5f9;
       --muted: #94a3b8;
-      --accent: #8b5cf6;
-      --gradient: linear-gradient(135deg, #4f46e5, #7e22ce);
+      --nav-bg: rgba(15, 23, 42, 0.9);
     }
     
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     
     body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--gradient);
-      background-attachment: fixed;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      background-image: radial-gradient(circle at 50% 0%, #1e1b4b, #0f172a);
       color: var(--text);
-      min-height: 100dvh;
+      min-height: 100vh;
+      padding-bottom: 110px; /* Space for bottom nav + floating player */
     }
-    
+
+    /* --- HEADER --- */
     header {
-      position: relative;
+      padding: 2rem 1.5rem 1rem;
       text-align: center;
-      padding: 2rem 1rem 1rem;
-      background: linear-gradient(to bottom, rgba(79, 70, 229, 0.8), transparent);
-      backdrop-filter: blur(10px);
     }
     
-    .back-btn {
-      position: absolute;
-      top: 1rem;
-      left: 1rem;
-      background: rgba(255, 255, 255, 0.1);
-      border: none;
-      color: var(--text);
-      padding: 0.5rem 1rem;
-      border-radius: 20px;
-      cursor: pointer;
-      backdrop-filter: blur(5px);
-      text-decoration: none;
-      font-size: 0.9rem;
-      transition: all 0.3s;
-    }
-    
-    .back-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-    
-    header h1 {
-      font-size: clamp(1.5rem, 4vw, 2rem);
-      font-weight: 700;
-      background: linear-gradient(90deg, #a78bfa, #f0abfc);
+    h1 {
+      font-size: 1.8rem; font-weight: 700;
+      background: linear-gradient(to right, #a78bfa, #818cf8);
       -webkit-background-clip: text;
-      background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: 0.5rem;
     }
     
+    header p { color: var(--muted); font-size: 0.9rem; }
+
+    /* --- SOUND GRID --- */
     .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 1rem;
+      padding: 0 1rem; max-width: 600px; margin: 0 auto;
     }
-    
-    /* Music Player Styles */
-    .music-player {
-      background: var(--panel);
-      border-radius: 20px;
-      padding: 2rem;
-      margin-bottom: 2rem;
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(148, 163, 184, 0.15);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
-    }
-    
-    .now-playing {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    
-    .track-cover {
-      width: 200px;
-      height: 200px;
-      border-radius: 20px;
-      margin: 0 auto 1rem;
-      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 3rem;
-      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
-    }
-    
-    .track-info h2 {
-      font-size: 1.5rem;
-      margin-bottom: 0.5rem;
-      color: var(--text);
-    }
-    
-    .track-info p {
-      color: var(--muted);
-      font-size: 1rem;
-    }
-    
-    .progress-container {
-      margin: 2rem 0;
-    }
-    
-    .progress-bar {
-      width: 100%;
-      height: 6px;
-      background: rgba(148, 163, 184, 0.2);
-      border-radius: 3px;
-      overflow: hidden;
-      margin-bottom: 0.5rem;
-    }
-    
-    .progress {
-      width: 0%;
-      height: 100%;
-      background: linear-gradient(90deg, #8b5cf6, #7c3aed);
-      border-radius: 3px;
-      transition: width 0.1s linear;
-    }
-    
-    .time-info {
-      display: flex;
-      justify-content: space-between;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-    
-    .controls {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1.5rem;
-      margin: 2rem 0;
-    }
-    
-    .control-btn {
-      background: none;
-      border: none;
-      color: var(--text);
-      font-size: 1.2rem;
-      cursor: pointer;
-      padding: 0.8rem;
-      border-radius: 50%;
-      transition: all 0.3s;
-    }
-    
-    .control-btn:hover {
-      background: rgba(139, 92, 246, 0.2);
-    }
-    
-    .play-btn {
-      background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-      width: 60px;
-      height: 60px;
-      font-size: 1.5rem;
-      box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
-    }
-    
-    .play-btn:hover {
-      transform: scale(1.1);
-    }
-    
-    .auto-play {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
+
+    .sound-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
       margin-top: 1rem;
-      color: var(--muted);
     }
-    
-    .auto-play input {
-      width: 18px;
-      height: 18px;
-    }
-    
-    /* Playlist Styles */
-    .playlist {
+
+    .sound-card {
       background: var(--panel);
+      border: 1px solid var(--border);
       border-radius: 20px;
       padding: 1.5rem;
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(148, 163, 184, 0.15);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(12px);
+      position: relative;
+      overflow: hidden;
     }
-    
-    .playlist h2 {
-      margin-bottom: 1rem;
-      color: var(--accent);
-      font-size: 1.3rem;
+
+    .sound-card:active { transform: scale(0.96); }
+
+    /* Active State (Playing) */
+    .sound-card.playing {
+      border-color: var(--primary);
+      background: rgba(129, 140, 248, 0.15);
+      box-shadow: 0 0 20px var(--active-glow);
     }
-    
-    .track-list {
-      list-style: none;
+
+    .icon { font-size: 2rem; transition: transform 0.3s; }
+    .sound-card.playing .icon { transform: scale(1.1); animation: float 3s ease-in-out infinite; }
+
+    .label { font-size: 0.9rem; font-weight: 600; color: var(--muted); }
+    .sound-card.playing .label { color: white; }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1.1); }
+      50% { transform: translateY(-5px) scale(1.1); }
     }
-    
-    .track-item {
+
+    /* --- MASTER CONTROLS --- */
+    .master-controls {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      margin: 2rem 0;
+      padding: 1rem;
+      border-radius: 16px;
       display: flex;
       align-items: center;
-      padding: 1rem;
-      border-radius: 12px;
-      margin-bottom: 0.5rem;
-      cursor: pointer;
-      transition: all 0.3s;
-      border: 1px solid transparent;
+      gap: 15px;
     }
-    
-    .track-item:hover {
-      background: rgba(139, 92, 246, 0.1);
-    }
-    
-    .track-item.active {
-      background: rgba(139, 92, 246, 0.2);
-      border-color: rgba(139, 92, 246, 0.4);
-    }
-    
-    .track-number {
-      width: 30px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-    
-    .track-details {
-      flex: 1;
-      margin: 0 1rem;
-    }
-    
-    .track-details h3 {
-      font-size: 1rem;
-      margin-bottom: 0.2rem;
-      color: var(--text);
-    }
-    
-    .track-details p {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-    
-    .track-duration {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-    
-    .playing-indicator {
-      color: var(--accent);
-      margin-left: 0.5rem;
-      animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-    
-    footer {
-      text-align: center;
-      padding: 2rem 1rem;
-      color: var(--muted);
-      font-size: 0.85rem;
-      background: rgba(15, 23, 42, 0.7);
-      backdrop-filter: blur(10px);
-      margin-top: 2rem;
-    }
-    
-    .footer-menu {
-      display: flex;
-      justify-content: center;
-      gap: 2rem;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-    }
-    
-    .footer-menu a {
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.3s;
+
+    .btn-stop {
+      background: rgba(239, 68, 68, 0.2);
+      color: #fca5a5;
+      border: 1px solid rgba(239, 68, 68, 0.3);
       padding: 0.5rem 1rem;
-      border-radius: 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      cursor: pointer;
+    }
+
+    input[type=range] {
+      flex: 1;
+      accent-color: var(--primary);
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+    }
+
+    /* --- BOTTOM NAV --- */
+    .bottom-nav {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: var(--nav-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      padding: 10px 20px;
+      border-radius: 50px;
+      display: flex; gap: 20px;
+      z-index: 100;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .nav-item {
+      color: var(--muted); text-decoration: none;
+      display: flex; flex-direction: column; align-items: center;
+      font-size: 0.7rem; gap: 4px; padding: 5px 10px;
+      border-radius: 15px; transition: 0.3s;
     }
     
-    .footer-menu a.active {
-      color: var(--accent);
-      background: rgba(255, 255, 255, 0.05);
-    }
-    
-    .footer-menu a:hover {
-      color: var(--accent);
-      background: rgba(255, 255, 255, 0.05);
-    }
+    /* Active state for Music Page */
+    .nav-item.active { color: var(--primary); background: rgba(129, 140, 248, 0.1); }
+    .nav-icon { font-size: 1.2rem; }
+
   </style>
 </head>
 <body>
+
   <header>
-    <a href="index.html" class="back-btn">← Back</a>
-    <h1>Sleep Music</h1>
-    <p>Relaxing sounds for better sleep</p>
+    <h1>Soundscapes</h1>
+    <p>Mix sounds to create your perfect sleep environment.</p>
   </header>
 
   <div class="container">
-    <!-- Music Player -->
-    <div class="music-player">
-      <div class="now-playing">
-        <div class="track-cover">🎵</div>
-        <div class="track-info">
-          <h2 id="currentTitle">Select a track</h2>
-          <p id="currentArtist">-</p>
-        </div>
-      </div>
-
-      <div class="progress-container">
-        <div class="progress-bar">
-          <div class="progress" id="progress"></div>
-        </div>
-        <div class="time-info">
-          <span id="currentTime">0:00</span>
-          <span id="duration">0:00</span>
-        </div>
-      </div>
-
-      <div class="controls">
-        <button class="control-btn" id="prevBtn" title="Previous">⏮</button>
-        <button class="control-btn play-btn" id="playBtn" title="Play">▶</button>
-        <button class="control-btn" id="nextBtn" title="Next">⏭</button>
-      </div>
-
-      <div class="auto-play">
-        <input type="checkbox" id="autoPlay" checked>
-        <label for="autoPlay">Auto play next track</label>
-      </div>
+    
+    <!-- Controls -->
+    <div class="master-controls">
+      <span style="font-size: 1.2rem;">🔊</span>
+      <input type="range" id="masterVolume" min="0" max="1" step="0.1" value="0.5">
+      <button class="btn-stop" onclick="stopAll()">STOP ALL</button>
     </div>
 
-    <!-- Playlist -->
-    <div class="playlist">
-      <h2>Sleep Music Playlist</h2>
-      <ul class="track-list" id="trackList">
-        <!-- Tracks will be loaded here -->
-      </ul>
+    <!-- Sound Grid -->
+    <div class="sound-grid">
+      <!-- Card 1: Rain -->
+      <div class="sound-card" onclick="toggleSound(this, 'rain')">
+        <div class="icon">🌧️</div>
+        <div class="label">Rain</div>
+        <!-- Gunakan link MP3 asli di sini nanti -->
+        <audio loop id="rain" src="https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg"></audio>
+      </div>
+
+      <!-- Card 2: Ocean -->
+      <div class="sound-card" onclick="toggleSound(this, 'ocean')">
+        <div class="icon">🌊</div>
+        <div class="label">Ocean</div>
+        <audio loop id="ocean" src="https://actions.google.com/sounds/v1/water/waves_crashing_on_rock_beach.ogg"></audio>
+      </div>
+
+      <!-- Card 3: Forest -->
+      <div class="sound-card" onclick="toggleSound(this, 'forest')">
+        <div class="icon">🌲</div>
+        <div class="label">Forest</div>
+        <audio loop id="forest" src="https://actions.google.com/sounds/v1/animals/grey_squirrel_rattle.ogg"></audio>
+      </div>
+
+      <!-- Card 4: Fire -->
+      <div class="sound-card" onclick="toggleSound(this, 'fire')">
+        <div class="icon">🔥</div>
+        <div class="label">Campfire</div>
+        <audio loop id="fire" src="https://actions.google.com/sounds/v1/ambiences/fire.ogg"></audio>
+      </div>
+      
+      <!-- Card 5: Fan/White Noise -->
+      <div class="sound-card" onclick="toggleSound(this, 'fan')">
+        <div class="icon">🌀</div>
+        <div class="label">Fan Noise</div>
+        <audio loop id="fan" src="https://actions.google.com/sounds/v1/ambiences/industrial_hum.ogg"></audio>
+      </div>
+
+      <!-- Card 6: Night -->
+      <div class="sound-card" onclick="toggleSound(this, 'night')">
+        <div class="icon">🦗</div>
+        <div class="label">Crickets</div>
+        <audio loop id="night" src="https://actions.google.com/sounds/v1/animals/crickets.ogg"></audio>
+      </div>
     </div>
   </div>
 
-  <footer>
-    <div class="footer-menu">
-      <a href="index.html">HOME</a>
-      <a href="music.html" class="active">SLEEP MUSIC</a>
-      <a href="game.html">GAME</a>
-    </div>
-    <p>Sweet dreams with relaxing sounds</p>
-  </footer>
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <span class="nav-icon">🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="#" class="nav-item active">
+      <span class="nav-icon">🎵</span>
+      <span>Music</span>
+    </a>
+    <a href="game.html" class="nav-item">
+      <span class="nav-icon">🎮</span>
+      <span>Game</span>
+    </a>
+  </nav>
 
   <script>
-    // Music Data - Replace with your actual music files
-    const musicTracks = [
-      {
-        id: 1,
-        title: "Guera Encantadora",
-        artist: "Casa Rosa",
-        duration: "8:15",
-        src: "https://r8---sn-2uuxa3vh-wvbe.googlevideo.com/videoplayback?expire=1763526646&ei=nkUdaaP7IP_lrtoP_c-d8AU&ip=0.0.0.0&id=53f2f1cd97a2a3d7&itag=25&source=yt_reference&requiressl=yes&xpc=Egho2aDSNXoBAQ==&susc=ytcm&siu=1&mime=audio/mpeg&vprv=1&rqh=1&gir=yes&clen=7210878&ratebypass=yes&dur=180.271&lmt=1741367880839045&title=Guera%20Encantadora%20-%20Casa%20Rosa&ext=mp3&txp=0011224&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,susc,siu,mime,vprv,rqh,gir,clen,ratebypass,dur,lmt,title,ext&sig=AJfQdSswRAIgaCzxibNHuioIm68r83Txf6gR2qZvzOB-eSwkWwnalw8CIHJNJzYKf-0aSQ1Qmk7oIUdD8Uo7zhhgSL4pPlqoD3YA&cms_redirect=yes&cps=100&met=1763526046,&mh=g5&mip=182.8.225.173&mm=31&mn=sn-2uuxa3vh-wvbe&ms=au&mt=1763525627&mv=m&mvi=8&pl=24&rms=au,au&lsparams=cps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=APaTxxMwRAIhAMjgVQlh1qdAj4ESK6QNjDWahRFRn7NrZ2Av5kWmMCNpAh89LyDySYYExdfsh5cS0m9W1rn4gSCgX9JtYoRMuiK5"
-      },
-      {
-        id: 2,
-        title: "Como Vamos?",
-        artist: "Casa Rosa",
-        duration: "10:30",
-        src: "https://r3---sn-2uuxa3vh-wvbd.googlevideo.com/videoplayback?expire=1763526709&ei=3UUdaZvHLb_t9fwPp46lgQM&ip=0.0.0.0&id=63be23a7df30c265&itag=25&source=yt_reference&requiressl=yes&xpc=Egho2aDSNXoBAQ==&susc=ytcm&siu=1&mime=audio/mpeg&vprv=1&rqh=1&gir=yes&clen=4096037&ratebypass=yes&dur=102.399&lmt=1741367826762004&title=Como%20Vamos%3F%20-%20Casa%20Rosa&ext=mp3&txp=0011224&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,susc,siu,mime,vprv,rqh,gir,clen,ratebypass,dur,lmt,title,ext&sig=AJfQdSswRQIhAPOUwRcxiXYkxVIoarszRQvTOOm8p3B1KWO14rmJW0lmAiAre2kOqDX9s2xTwxo2SwaYHb0lVA-izk3lDjXLyGXBEQ==&cms_redirect=yes&cps=100&met=1763526109,&mh=gQ&mip=182.8.225.173&mm=31&mn=sn-2uuxa3vh-wvbd&ms=au&mt=1763525627&mv=m&mvi=3&pl=24&rms=au,au&lsparams=cps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=APaTxxMwRQIgULUk-EAXLUWek3IzprZAo_P7bgFLr2R1rW4MgGVn7IMCIQDZtjUWlnwNN7fo6EYLMFds44RhmkgyMD0-vhnY1gIs7Q%3D%3D"
-      },
-      {
-        id: 3,
-        title: "Sus Remedios",
-        artist: "Casa Rosa",
-        duration: "7:45",
-        src: "https://r8---sn-2uuxa3vh-wvbe.googlevideo.com/videoplayback?expire=1763526781&ei=JUYdaeHJF-nI9fwP4dP1mAs&ip=0.0.0.0&id=3103a82229c4011f&itag=25&source=yt_reference&requiressl=yes&xpc=Egho2aDSNXoBAQ==&susc=ytcm&siu=1&mime=audio/mpeg&vprv=1&rqh=1&gir=yes&clen=6138812&ratebypass=yes&dur=153.469&lmt=1741367885293766&title=Sus%20Remedios%20-%20Casa%20Rosa&ext=mp3&txp=0011224&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,susc,siu,mime,vprv,rqh,gir,clen,ratebypass,dur,lmt,title,ext&sig=AJfQdSswRAIgNkwHeSj_yTIYS4KBZlC4x5vSr10K0Xyha-eqQU6U_owCIBGNR53__lMxRcjNRM_h0-lFClrwneElifLwYalhgKYQ&cms_redirect=yes&cps=100&met=1763526181,&mh=41&mip=182.8.225.173&mm=31&mn=sn-2uuxa3vh-wvbe&ms=au&mt=1763525834&mv=m&mvi=8&pl=24&rms=au,au&lsparams=cps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=APaTxxMwRgIhAMZztwocVSf8Gnay4_TCSmWDQZ5JqMjovUyw0N1h3pCdAiEA5c2HPhPBblZXe2w0ZSeuDl_wNdoIqiqlF8yjrxHwKh0%3D"
-      },
-      {
-        id: 4,
-        title: "Mas Cafe",
-        artist: "Casa Rosa",
-        duration: "9:20",
-        src: "https://r3---sn-2uuxa3vh-wvbd.googlevideo.com/videoplayback?expire=1763526855&ei=b0YdabigG6XmrtoP8JT1yQw&ip=0.0.0.0&id=367b69ad7c0089c9&itag=25&source=yt_reference&requiressl=yes&xpc=Egho2aDSNXoBAQ==&susc=ytcm&siu=1&mime=audio/mpeg&vprv=1&rqh=1&gir=yes&clen=7010257&ratebypass=yes&dur=175.255&lmt=1741367849532511&title=Mas%20Cafe%20-%20Casa%20Rosa&ext=mp3&txp=0011224&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,susc,siu,mime,vprv,rqh,gir,clen,ratebypass,dur,lmt,title,ext&sig=AJfQdSswRgIhAN7u98nFIJCzh7hO2Pbmff1v3rDkdtoN43igfhNdZ4AIAiEA06lrHmuMp74X4cBBGnhd-RztZjAgCNNI4ztMG7FSedo=&cms_redirect=yes&cps=100&met=1763526255,&mh=Bc&mip=182.8.225.173&mm=31&mn=sn-2uuxa3vh-wvbd&ms=au&mt=1763525834&mv=m&mvi=3&pl=24&rms=au,au&lsparams=cps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=APaTxxMwRQIgcunGCbuy3OSREJTI2exouSHKpf5-q5YbzOPtm5xMlLICIQCsDlXRzO-THoD6HaiOMxd0vcjrnm-fav3FKrv0SC8V6Q%3D%3D"
-      },
-      {
-        id: 5,
-        title: "Otros Hijos",
-        artist: "Casa Rosa",
-        duration: "11:05",
-        src: "https://r2---sn-2uuxa3vh-wvbz.googlevideo.com/videoplayback?expire=1763526935&ei=v0Ydae1thKX1_A-bjuUZ&ip=0.0.0.0&id=39830123d6a03ff3&itag=25&source=yt_reference&requiressl=yes&xpc=Egho2aDSNXoBAQ==&susc=ytcm&siu=1&mime=audio/mpeg&vprv=1&rqh=1&gir=yes&clen=4915237&ratebypass=yes&dur=122.879&lmt=1741367862610483&title=Otros%20Hijos%20-%20Casa%20Rosa&ext=mp3&txp=0011224&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,susc,siu,mime,vprv,rqh,gir,clen,ratebypass,dur,lmt,title,ext&sig=AJfQdSswRAIgDWXRROnWqPpzwk6UCdRQtYohp5iUWDtvb5GdoptUlIUCIBFrlGXkWfyElGA4v7T0H7SoV9Z7FVl2d6Bhuv4430yW&cms_redirect=yes&cps=100&met=1763526335,&mh=PY&mip=182.8.225.173&mm=31&mn=sn-2uuxa3vh-wvbz&ms=au&mt=1763525834&mv=m&mvi=2&pl=24&rms=au,au&lsparams=cps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=APaTxxMwRQIhAKqEd7jsgPUpwHFjKBNNOZdcFUqZUySUBZcC1jOFCkamAiA2ByfwwLVUudkZYxWSIo6GFn3gQdbZVDbLbZLznJMrkA%3D%3D"
-      },
+    // Volume Control
+    const masterVolumeSlider = document.getElementById('masterVolume');
+    const audioElements = document.querySelectorAll('audio');
 
-      {
-        id: 5,
-        title: "No Se",
-        artist: "Casa Rosa",
-        duration: "11:05",
-        src: "https://r2---sn-2uuxa3vh-wvbz.googlevideo.com/videoplayback?expire=1763527016&ei=EEcdaeOxIo769fwPyYqp6QQ&ip=0.0.0.0&id=c6eb987f0919853f&itag=25&source=yt_reference&requiressl=yes&xpc=Egho2aDSNXoBAQ==&susc=ytcm&siu=1&mime=audio/mpeg&vprv=1&rqh=1&gir=yes&clen=4332184&ratebypass=yes&dur=108.303&lmt=1741367848023817&title=No%20Se%20-%20Casa%20Rosa&ext=mp3&txp=0011224&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,susc,siu,mime,vprv,rqh,gir,clen,ratebypass,dur,lmt,title,ext&sig=AJfQdSswRgIhANJ9naNpUv1h2RIyeEjCR8-6DIe-u8VPQ4nfX-4HuPhaAiEA9Wg0qoiasneXNNl9SkwKj4GY-VPR1RAhmxHpsNTJ0dg=&cms_redirect=yes&cps=102&met=1763526416,&mh=cp&mip=182.8.225.173&mm=31&mn=sn-2uuxa3vh-wvbz&ms=au&mt=1763526073&mv=m&mvi=2&pl=24&rms=au,au&lsparams=cps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=APaTxxMwRQIgXNRJJkbamVoilOCzU4yi_zEfo99Yg92NbfldegrwAhMCIQCGcpa7Ph7s-ZwRl66D3t7hJSrMl6a4VfFmKI_8RQrjZQ%3D%3D"
-      },
+    // Set initial volume
+    audioElements.forEach(audio => audio.volume = masterVolumeSlider.value);
 
-      {
-        id: 5,
-        title: "Curadora",
-        artist: "Casa Rosa",
-        duration: "11:05",
-        src: "https://r1---sn-2uuxa3vh-wvbl.googlevideo.com/videoplayback?expire=1763527107&ei=a0cdaYL1HfCRssUP2Z6MyAk&ip=0.0.0.0&id=2dede7bcda0afcac&itag=25&source=yt_reference&requiressl=yes&xpc=Egho2aDSNXoBAQ==&susc=ytcm&siu=1&mime=audio/mpeg&vprv=1&rqh=1&gir=yes&clen=4282029&ratebypass=yes&dur=107.049&lmt=1741367837329571&title=Curadora%20-%20Casa%20Rosa&ext=mp3&txp=0011224&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,susc,siu,mime,vprv,rqh,gir,clen,ratebypass,dur,lmt,title,ext&sig=AJfQdSswRAIgX52gxaOTDAreQJIz0UPdefj3mDloa2lzD2sVTaE1tzoCIF8-dENbKYgtiAk80DJCh0KiZvJdamlcMAkrzOkzy8cA&cms_redirect=yes&cps=100&met=1763526507,&mh=ba&mip=182.8.225.173&mm=31&mn=sn-2uuxa3vh-wvbl&ms=au&mt=1763526073&mv=m&mvi=1&pl=24&rms=au,au&lsparams=cps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=APaTxxMwRgIhAMZ9Jm4lUnRblev4cMxteyOIFY-JcjO1NpzI312_2i06AiEAtIDYzKz91lVNHRA0Jvwlw5YSq4uqvfui_wKeQk-8qV0%3D"
-      },
-
-      {
-        id: 5,
-        title: "Candy Apple Town",
-        artist: "National Sweetheart",
-        duration: "11:05",
-        src: "https://r1---sn-2uuxa3vh-wvbl.googlevideo.com/videoplayback?expire=1763527177&ei=sUcdacncHf25rtoPh-6YoQk&ip=0.0.0.0&id=6d7602df14ec76ea&itag=25&source=yt_reference&requiressl=yes&xpc=Egho2aDSNXoBAQ==&susc=ytcm&siu=1&mime=audio/mpeg&vprv=1&rqh=1&gir=yes&clen=8427139&ratebypass=yes&dur=210.677&lmt=1725406059955763&title=Candy%20Apple%20Town%20-%20National%20Sweetheart&ext=mp3&txp=0011224&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,susc,siu,mime,vprv,rqh,gir,clen,ratebypass,dur,lmt,title,ext&sig=AJfQdSswRgIhAI-ffgDh43e08jWDjgGwb6t0kIVqLI0mXTOqiqQjkZcMAiEA6cwzxG8xzg4rdmru8IXYHE7bqqURMJ_Dcvq0fHBmKgk=&cms_redirect=yes&cps=100&met=1763526577,&mh=AO&mip=182.8.225.173&mm=31&mn=sn-2uuxa3vh-wvbl&ms=au&mt=1763526073&mv=m&mvi=1&pl=24&rms=au,au&lsparams=cps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=APaTxxMwRQIgIT4RB8HSq3eX6aSAIh6VxWrVA6Xsx1J7_bJXz_tlLM8CIQCvnhB2lUlXCehWrrM3rhJZtlddUvULGDtRzMy_9otTjQ%3D%3D"
-      },
-
-      {
-        id: 5,
-        title: "Last Cappuccino in Rio",
-        artist: "Chris Haugen",
-        duration: "11:05",
-        src: "https://r4---sn-2uuxa3vh-wvbz.googlevideo.com/videoplayback?expire=1763526427&ei=w0QdaZ-EC42r4t4P_aS_6Ag&ip=0.0.0.0&id=3e24a57de642278a&itag=25&source=yt_reference&requiressl=yes&xpc=Egho2aDSNXoBAQ==&susc=ytcm&siu=1&mime=audio/mpeg&vprv=1&rqh=1&gir=yes&clen=4404282&ratebypass=yes&dur=110.106&lmt=1743703962535662&title=Last%20Cappuccino%20in%20Rio%20-%20Chris%20Haugen&ext=mp3&txp=0011224&sparams=expire,ei,ip,id,itag,source,requiressl,xpc,susc,siu,mime,vprv,rqh,gir,clen,ratebypass,dur,lmt,title,ext&sig=AJfQdSswRAIgXB0PQUdx9OnTy0CIES_IxyTOJ-CD7BVC2Lehnz-NLZ8CIFqb1EaHzJltg5cz9HmvqT7QihwyMUkE-nn7raZOGb6s&cms_redirect=yes&cps=100&met=1763525827,&mh=nR&mip=182.8.225.173&mm=31&mn=sn-2uuxa3vh-wvbz&ms=au&mt=1763525360&mv=m&mvi=4&pl=24&rms=au,au&lsparams=cps,met,mh,mip,mm,mn,ms,mv,mvi,pl,rms&lsig=APaTxxMwRAIgSX1sM7DvNYbw4Y-JdRP0B6OvT7BUCuUrDw1HIqj2vJ4CIBb4tg3FYC2DMes3mQ2UbGE5f1qBJ-HZ6MlYiq4_HQzH"
-      },
-      {
-        id: 6,
-        title: "Jaguar in the Mist",
-        artist: "Chris Haugen",
-        duration: "6:50",
-        src: "jaguar.mp3"
-      }
-    ];
-
-    // Audio Player
-    const audio = new Audio();
-    let currentTrackIndex = 0;
-    let isPlaying = false;
-    let isAutoPlay = true;
-
-    // DOM Elements
-    const playBtn = document.getElementById('playBtn');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const autoPlayCheckbox = document.getElementById('autoPlay');
-    const progress = document.getElementById('progress');
-    const currentTimeEl = document.getElementById('currentTime');
-    const durationEl = document.getElementById('duration');
-    const currentTitle = document.getElementById('currentTitle');
-    const currentArtist = document.getElementById('currentArtist');
-    const trackList = document.getElementById('trackList');
-
-    // Initialize Playlist
-    function initializePlaylist() {
-      trackList.innerHTML = '';
-      musicTracks.forEach((track, index) => {
-        const li = document.createElement('li');
-        li.className = 'track-item';
-        if (index === currentTrackIndex) {
-          li.classList.add('active');
-        }
-        
-        li.innerHTML = `
-          <div class="track-number">${track.id}</div>
-          <div class="track-details">
-            <h3>${track.title}</h3>
-            <p>${track.artist}</p>
-          </div>
-          <div class="track-duration">${track.duration}</div>
-          ${index === currentTrackIndex && isPlaying ? '<div class="playing-indicator">▶</div>' : ''}
-        `;
-        
-        li.addEventListener('click', () => {
-          playTrack(index);
-        });
-        
-        trackList.appendChild(li);
+    // Update volume when slider changes
+    masterVolumeSlider.addEventListener('input', (e) => {
+      const vol = e.target.value;
+      audioElements.forEach(audio => {
+        audio.volume = vol;
       });
-    }
+    });
 
-    // Play Track
-    function playTrack(index) {
-      currentTrackIndex = index;
-      const track = musicTracks[index];
+    // Toggle Play/Pause
+    function toggleSound(card, soundId) {
+      const audio = document.getElementById(soundId);
       
-      audio.src = track.src;
-      currentTitle.textContent = track.title;
-      currentArtist.textContent = track.artist;
-      
-      audio.play().then(() => {
-        isPlaying = true;
-        updatePlayButton();
-        updatePlaylistUI();
-      }).catch(error => {
-        console.log('Play failed:', error);
-        // Fallback: Simulate playback for demo
-        simulatePlayback();
-      });
-    }
-
-    // Simulate playback for demo (when audio files not available)
-    function simulatePlayback() {
-      isPlaying = true;
-      updatePlayButton();
-      updatePlaylistUI();
-      
-      // Simulate progress
-      let currentTime = 0;
-      const duration = 480; // 8 minutes in seconds
-      
-      const progressInterval = setInterval(() => {
-        if (!isPlaying) {
-          clearInterval(progressInterval);
-          return;
-        }
-        
-        currentTime += 1;
-        const progressPercent = (currentTime / duration) * 100;
-        progress.style.width = `${progressPercent}%`;
-        
-        // Update time display
-        currentTimeEl.textContent = formatTime(currentTime);
-        durationEl.textContent = formatTime(duration);
-        
-        // Track ended
-        if (currentTime >= duration) {
-          clearInterval(progressInterval);
-          if (isAutoPlay) {
-            playNextTrack();
-          } else {
-            isPlaying = false;
-            updatePlayButton();
-          }
-        }
-      }, 1000);
-    }
-
-    // Format time (seconds to MM:SS)
-    function formatTime(seconds) {
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins}:${secs.toString().padStart(2, '0')}`;
-    }
-
-    // Update Play Button
-    function updatePlayButton() {
-      playBtn.innerHTML = isPlaying ? '⏸' : '▶';
-      playBtn.title = isPlaying ? 'Pause' : 'Play';
-    }
-
-    // Update Playlist UI
-    function updatePlaylistUI() {
-      const items = trackList.querySelectorAll('.track-item');
-      items.forEach((item, index) => {
-        item.classList.remove('active');
-        const indicator = item.querySelector('.playing-indicator');
-        if (indicator) indicator.remove();
-        
-        if (index === currentTrackIndex) {
-          item.classList.add('active');
-          if (isPlaying) {
-            item.innerHTML += '<div class="playing-indicator">▶</div>';
-          }
-        }
-      });
-    }
-
-    // Play/Pause
-    playBtn.addEventListener('click', () => {
-      if (audio.src === '') {
-        playTrack(currentTrackIndex);
-        return;
-      }
-      
-      if (isPlaying) {
-        audio.pause();
-        isPlaying = false;
-      } else {
+      if (audio.paused) {
+        // Play
         audio.play();
-        isPlaying = true;
-      }
-      updatePlayButton();
-      updatePlaylistUI();
-    });
-
-    // Next Track
-    function playNextTrack() {
-      currentTrackIndex = (currentTrackIndex + 1) % musicTracks.length;
-      playTrack(currentTrackIndex);
-    }
-
-    // Previous Track
-    function playPrevTrack() {
-      currentTrackIndex = (currentTrackIndex - 1 + musicTracks.length) % musicTracks.length;
-      playTrack(currentTrackIndex);
-    }
-
-    nextBtn.addEventListener('click', playNextTrack);
-    prevBtn.addEventListener('click', playPrevTrack);
-
-    // Auto Play Toggle
-    autoPlayCheckbox.addEventListener('change', () => {
-      isAutoPlay = autoPlayCheckbox.checked;
-    });
-
-    // Audio Event Listeners
-    audio.addEventListener('ended', () => {
-      if (isAutoPlay) {
-        playNextTrack();
+        card.classList.add('playing');
       } else {
-        isPlaying = false;
-        updatePlayButton();
-        updatePlaylistUI();
+        // Pause
+        audio.pause();
+        card.classList.remove('playing');
       }
-    });
+    }
 
-    audio.addEventListener('timeupdate', () => {
-      if (audio.duration) {
-        const progressPercent = (audio.currentTime / audio.duration) * 100;
-        progress.style.width = `${progressPercent}%`;
-        currentTimeEl.textContent = formatTime(audio.currentTime);
-        durationEl.textContent = formatTime(audio.duration);
-      }
-    });
+    // Stop All Sounds
+    function stopAll() {
+      audioElements.forEach(audio => {
+        audio.pause();
+        audio.currentTime = 0; // Reset to start
+      });
+      
+      // Remove UI active state
+      document.querySelectorAll('.sound-card').forEach(card => {
+        card.classList.remove('playing');
+      });
+    }
 
-    // Progress Bar Click
-    progress.parentElement.addEventListener('click', (e) => {
-      const rect = progress.parentElement.getBoundingClientRect();
-      const percent = (e.clientX - rect.left) / rect.width;
-      if (audio.duration) {
-        audio.currentTime = percent * audio.duration;
-      }
-    });
-
-    // Initialize
-    initializePlaylist();
-    
-    // Auto play first track
-    setTimeout(() => {
-      playTrack(0);
-    }, 1000);
+    // Optional: PWA Service Worker Check (Agar page ini juga dicache)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(registration => {
+        console.log('Service Worker Ready in Music Page');
+      });
+    }
   </script>
+
 </body>
 </html>
