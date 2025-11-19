@@ -1,17 +1,20 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="theme-color" content="#4f46e5">
-  <meta name="description" content="Kalkulator siklus tidur 90 menit + 15 menit terlelap. Hitung jam tidur/bangun ideal agar selalu segar!">
+  <meta name="description" content="Sleep cycle calculator 90 minutes + 15 minutes to fall asleep. Calculate ideal sleep/wake times to always feel refreshed!">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
   
-  <title>Kalkulator Siklus Tidur</title>
+  <title>Sleep Optimizer</title>
 
   <!-- PWA Manifest -->
   <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icon-192.png">
-  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="shortcut icon" href="icons/favicon.ico">
 
   <!-- Font & Style -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -71,7 +74,7 @@
       font-size: 1.5rem;
     }
     
-    /* Hamburger Menu Styles */
+    /* Hamburger Menu Styles - Fixed Width */
     .hamburger-menu {
       position: absolute;
       top: 1rem;
@@ -132,6 +135,7 @@
       transform: translateY(-10px);
       transition: all 0.3s;
       z-index: 100;
+      width: 160px; /* Fixed width - not too long */
     }
     
     .language-dropdown.active {
@@ -143,7 +147,7 @@
     .lang-option {
       display: block;
       width: 100%;
-      padding: 0.8rem 1.2rem;
+      padding: 0.8rem 1rem;
       background: none;
       border: none;
       color: var(--text);
@@ -151,6 +155,7 @@
       cursor: pointer;
       transition: background 0.2s;
       font-size: 0.9rem;
+      white-space: nowrap;
     }
     
     .lang-option:hover {
@@ -424,11 +429,37 @@
       color: var(--accent);
       background: rgba(255, 255, 255, 0.05);
     }
+
+    /* Install Prompt */
+    .install-prompt {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 3%;
+      padding: 1rem;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      display: none;
+      max-width: 90%;
+      width: 300px;
+    }
+    
+    .install-prompt.show {
+      display: block;
+    }
+    
+    .install-prompt button {
+      margin-top: 0.5rem;
+    }
   </style>
 </head>
 <body>
   <header>
-    <div class="avatar" title="Avatar Tidur"></div>
+    <div class="avatar" title="Sleep Avatar"></div>
     
     <!-- Hamburger Menu untuk Bahasa -->
     <div class="hamburger-menu">
@@ -438,68 +469,85 @@
         <span></span>
       </button>
       <div class="language-dropdown" id="languageDropdown">
-        <button class="lang-option active" data-lang="ID">ID</button>
-        <button class="lang-option" data-lang="EN">EN</button>
+        <button class="lang-option active" data-lang="EN">EN</button>
+        <button class="lang-option" data-lang="ID">ID</button>
       </div>
     </div>
     
-    <h1>Kalkulator Siklus Tidur</h1>
-    <p>Hitung jam tidur & bangun ideal (90 menit/siklus + 15 menit terlelap)</p>
+    <h1>Sleep Optimizer</h1>
+    <p>Optimize your sleep, maximize your day</p>
   </header>
 
   <div class="container">
     <section class="card">
-      <h2>Jika mau bangun jam...</h2>
-      <div><label>Jam bangun</label><input type="time" id="wakeTime" value="07:00"></div>
+      <h2>If you want to wake up at...</h2>
+      <div><label>Wake up time</label><input type="time" id="wakeTime" value="07:00"></div>
       <div class="actions">
-        <button class="primary" id="calcBed">Rekomendasi Tidur</button>
-        <button class="secondary" id="wakeToNow">+7.5 jam dari sekarang</button>
+        <button class="primary" id="calcBed">Recommended Bedtime</button>
+        <button class="secondary" id="wakeToNow">+7.5 hours from now</button>
       </div>
       <div id="bedResults" class="result" aria-live="polite"></div>
     </section>
 
     <section class="card">
-      <h2>Jika mau tidur jam...</h2>
-      <div><label>Jam mulai tidur</label><input type="time" id="bedTime" value="22:30"></div>
+      <h2>If you want to sleep at...</h2>
+      <div><label>Bedtime</label><input type="time" id="bedTime" value="22:30"></div>
       <div class="actions">
-        <button class="primary" id="calcWake">Rekomendasi Bangun</button>
-        <button class="secondary" id="sleepNow">Tidur Sekarang</button>
+        <button class="primary" id="calcWake">Recommended Wake Time</button>
+        <button class="secondary" id="sleepNow">Sleep Now</button>
       </div>
       <div id="wakeResults" class="result" aria-live="polite"></div>
     </section>
   </div>
 
   <div class="legend">
-    <div class="kpi"><span class="dot ok"></span>Ideal (7.5 jam – 5 siklus)</div>
-    <div class="kpi"><span class="dot warn"></span><6 jam (kurang segar)</div>
+    <div class="kpi"><span class="dot ok"></span>Ideal (7.5 hours – 5 cycles)</div>
+    <div class="kpi"><span class="dot warn"></span><6 hours (less refreshed)</div>
   </div>
 
   <footer>
     <div class="footer-menu">
       <a href="#" id="homeLink">HOME</a>
-      <a href="#" id="musicLink">MUSIC TIDUR</a>
+      <a href="#" id="musicLink">SLEEP MUSIC</a>
       <a href="#" id="gameLink">GAME</a>
     </div>
-    <p>Catatan: panduan umum. Kebutuhan tidur tiap orang bisa berbeda.</p>
+    <p>Note: general guideline. Individual sleep needs may vary.</p>
   </footer>
 
-  <!-- Service Worker Registration -->
+  <!-- Install Prompt -->
+  <div class="install-prompt" id="installPrompt">
+    <p>Install app for better experience?</p>
+    <button class="primary" id="installBtn">Install</button>
+    <button class="secondary" id="cancelInstall">Later</button>
+  </div>
+
   <script>
+    // Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js')
-          .then(reg => console.log('SW registered', reg))
-          .catch(err => console.log('SW registration failed', err));
+          .then(reg => {
+            console.log('Service Worker registered', reg);
+          })
+          .catch(err => {
+            console.log('Service Worker registration failed', err);
+          });
       });
     }
 
-    // Logic kalkulator (sama seperti sebelumnya, cuma lebih ringkas)
+    // Sleep Calculator Logic
     const C = 90, O = 15;
     const pad = n => n.toString().padStart(2,'0');
     const toMin = t => t ? t.split(':').reduce((h,m)=>h*60+ +m) : null;
     const fromMin = m => { m=((m%1440)+1440)%1440; return `${pad(m/60|0)}:${pad(m%60)}`; };
-    const fmt = t => { const [h,m]=t.split(':'); const ampm=h<12?'AM':'PM'; const h12=h%12||12; return `${t} <small style="opacity:.7">(${h12}:${m} ${ampm})</small>`; };
-    const dur = c => c*1.5===Math.floor(c*1.5) ? `${c*1.5} jam` : `${(c*1.5).toFixed(1)} jam`;
+    const fmt = t => { 
+      const [h,m] = t.split(':');
+      const hour = parseInt(h);
+      const ampm = hour < 12 ? 'AM' : 'PM';
+      const h12 = hour % 12 || 12;
+      return `${t} <small style="opacity:.7">(${h12}:${m} ${ampm})</small>`;
+    };
+    const dur = c => c*1.5 === Math.floor(c*1.5) ? `${c*1.5} hours` : `${(c*1.5).toFixed(1)} hours`;
 
     const calcBed = w => [5,4,3,2].map(c=>({t:w-c*90-O,c,ideal:c===5,warn:c*1.5<6}));
     const calcWake = b => [6,5,4,3].map(c=>({t:b+O+c*90,c,ideal:c===5,warn:c*1.5<6}));
@@ -509,22 +557,29 @@
       items.forEach(i=>{
         const div = document.createElement('div');
         div.className = `pill ${i.ideal?'ideal':''} ${i.warn?'warn':''}`;
-        div.innerHTML = `<strong>${type==='bed'?'Tidur':'Bangun'} ${fmt(fromMin(i.t))}</strong><div class="sub">≈ ${dur(i.c)} (${i.c} siklus)</div>`;
+        const actionText = type === 'bed' ? 'Sleep at' : 'Wake up at';
+        div.innerHTML = `<strong>${actionText} ${fmt(fromMin(i.t))}</strong><div class="sub">≈ ${dur(i.c)} (${i.c} cycles)</div>`;
         el.appendChild(div);
       });
     };
 
+    // Event Listeners for Calculator
     document.getElementById('calcBed').onclick = () => render(bedResults, calcBed(toMin(wakeTime.value)), 'bed');
     document.getElementById('calcWake').onclick = () => render(wakeResults, calcWake(toMin(bedTime.value)), 'wake');
     document.getElementById('wakeToNow').onclick = () => {
-      const now = new Date(); render(bedResults, calcBed(now.getHours()*60 + now.getMinutes() + 450), 'bed');
+      const now = new Date(); 
+      render(bedResults, calcBed(now.getHours()*60 + now.getMinutes() + 450), 'bed');
     };
     document.getElementById('sleepNow').onclick = () => {
-      const now = new Date(); render(wakeResults, calcWake(now.getHours()*60 + now.getMinutes()), 'wake');
+      const now = new Date(); 
+      render(wakeResults, calcWake(now.getHours()*60 + now.getMinutes()), 'wake');
     };
 
-    // Auto hitung saat buka
-    window.onload = () => { document.getElementById('calcBed').click(); document.getElementById('calcWake').click(); };
+    // Auto calculate on load
+    window.onload = () => { 
+      document.getElementById('calcBed').click(); 
+      document.getElementById('calcWake').click(); 
+    };
     
     // Hamburger Menu Functionality
     const hamburgerBtn = document.getElementById('hamburgerBtn');
@@ -544,7 +599,7 @@
       languageDropdown.classList.remove('active');
     });
     
-    // Language selection
+    // Language selection functionality
     langOptions.forEach(option => {
       option.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -559,30 +614,12 @@
         const selectedLang = option.getAttribute('data-lang');
         
         // Change language based on selection
-        if (selectedLang === 'EN') {
-          document.documentElement.lang = 'en';
-          document.title = 'Sleep Cycle Calculator';
-          document.querySelector('header h1').textContent = 'Sleep Cycle Calculator';
-          document.querySelector('header p').textContent = 'Calculate ideal sleep & wake times (90 min/cycle + 15 min to fall asleep)';
-          document.querySelectorAll('.card h2')[0].textContent = 'If you want to wake up at...';
-          document.querySelectorAll('.card h2')[1].textContent = 'If you want to sleep at...';
-          document.querySelectorAll('label')[0].textContent = 'Wake up time';
-          document.querySelectorAll('label')[1].textContent = 'Bedtime';
-          document.getElementById('calcBed').textContent = 'Recommended Bedtime';
-          document.getElementById('calcWake').textContent = 'Recommended Wake Time';
-          document.getElementById('wakeToNow').textContent = '+7.5 hours from now';
-          document.getElementById('sleepNow').textContent = 'Sleep Now';
-          document.querySelector('.legend .kpi:nth-child(1)').textContent = 'Ideal (7.5 hours – 5 cycles)';
-          document.querySelector('.legend .kpi:nth-child(2)').textContent = '<6 hours (less refreshed)';
-          document.querySelector('footer p').textContent = 'Note: general guideline. Individual sleep needs may vary.';
-          document.getElementById('homeLink').textContent = 'HOME';
-          document.getElementById('musicLink').textContent = 'SLEEP MUSIC';
-          document.getElementById('gameLink').textContent = 'GAME';
-        } else {
+        if (selectedLang === 'ID') {
+          // Indonesian translations
           document.documentElement.lang = 'id';
-          document.title = 'Kalkulator Siklus Tidur';
-          document.querySelector('header h1').textContent = 'Kalkulator Siklus Tidur';
-          document.querySelector('header p').textContent = 'Hitung jam tidur & bangun ideal (90 menit/siklus + 15 menit terlelap)';
+          document.title = 'Optimizer Tidur';
+          document.querySelector('header h1').textContent = 'Optimizer Tidur';
+          document.querySelector('header p').textContent = 'Optimalkan tidur Anda, maksimalkan hari Anda';
           document.querySelectorAll('.card h2')[0].textContent = 'Jika mau bangun jam...';
           document.querySelectorAll('.card h2')[1].textContent = 'Jika mau tidur jam...';
           document.querySelectorAll('label')[0].textContent = 'Jam bangun';
@@ -597,6 +634,40 @@
           document.getElementById('homeLink').textContent = 'HOME';
           document.getElementById('musicLink').textContent = 'MUSIC TIDUR';
           document.getElementById('gameLink').textContent = 'GAME';
+          
+          // Update calculator results text for Indonesian
+          const updateIndonesianResults = () => {
+            document.getElementById('calcBed').click();
+            document.getElementById('calcWake').click();
+          };
+          setTimeout(updateIndonesianResults, 100);
+        } else {
+          // English translations (default)
+          document.documentElement.lang = 'en';
+          document.title = 'Sleep Optimizer';
+          document.querySelector('header h1').textContent = 'Sleep Optimizer';
+          document.querySelector('header p').textContent = 'Optimize your sleep, maximize your day';
+          document.querySelectorAll('.card h2')[0].textContent = 'If you want to wake up at...';
+          document.querySelectorAll('.card h2')[1].textContent = 'If you want to sleep at...';
+          document.querySelectorAll('label')[0].textContent = 'Wake up time';
+          document.querySelectorAll('label')[1].textContent = 'Bedtime';
+          document.getElementById('calcBed').textContent = 'Recommended Bedtime';
+          document.getElementById('calcWake').textContent = 'Recommended Wake Time';
+          document.getElementById('wakeToNow').textContent = '+7.5 hours from now';
+          document.getElementById('sleepNow').textContent = 'Sleep Now';
+          document.querySelector('.legend .kpi:nth-child(1)').textContent = 'Ideal (7.5 hours – 5 cycles)';
+          document.querySelector('.legend .kpi:nth-child(2)').textContent = '<6 hours (less refreshed)';
+          document.querySelector('footer p').textContent = 'Note: general guideline. Individual sleep needs may vary.';
+          document.getElementById('homeLink').textContent = 'HOME';
+          document.getElementById('musicLink').textContent = 'SLEEP MUSIC';
+          document.getElementById('gameLink').textContent = 'GAME';
+          
+          // Update calculator results text for English
+          const updateEnglishResults = () => {
+            document.getElementById('calcBed').click();
+            document.getElementById('calcWake').click();
+          };
+          setTimeout(updateEnglishResults, 100);
         }
         
         // Close dropdown after selection
@@ -605,21 +676,51 @@
       });
     });
     
-    // Fungsi untuk menu footer (placeholder)
+    // Footer menu functionality
     document.getElementById('homeLink').onclick = (e) => {
       e.preventDefault();
-      alert('Menu HOME diklik');
+      alert('HOME menu clicked');
     };
     
     document.getElementById('musicLink').onclick = (e) => {
       e.preventDefault();
-      alert('Menu MUSIC TIDUR diklik');
+      alert('SLEEP MUSIC menu clicked');
     };
     
     document.getElementById('gameLink').onclick = (e) => {
       e.preventDefault();
-      alert('Menu GAME diklik');
+      alert('GAME menu clicked');
     };
+
+    // PWA Install Prompt
+    let deferredPrompt;
+    const installPrompt = document.getElementById('installPrompt');
+    const installBtn = document.getElementById('installBtn');
+    const cancelInstall = document.getElementById('cancelInstall');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installPrompt.classList.add('show');
+    });
+
+    installBtn.addEventListener('click', async () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        } else {
+          console.log('User dismissed the install prompt');
+        }
+        deferredPrompt = null;
+        installPrompt.classList.remove('show');
+      }
+    });
+
+    cancelInstall.addEventListener('click', () => {
+      installPrompt.classList.remove('show');
+    });
   </script>
 </body>
 </html>
