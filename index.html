@@ -74,24 +74,24 @@
       font-size: 1.5rem;
     }
     
-    /* Hamburger Menu Styles - Fixed Width */
+    /* PERBAIKAN: Hamburger Menu Styles - No Outline, Mini Text */
     .hamburger-menu {
       position: absolute;
-      top: 1rem;
+      top: 1.2rem;
       right: 1rem;
+      z-index: 1000;
     }
     
     .hamburger-btn {
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
+      background: none;
+      border: none;
       color: var(--text);
-      padding: 0.5rem;
-      border-radius: 3%;
+      padding: 0.4rem;
+      border-radius: 8px;
       cursor: pointer;
-      backdrop-filter: blur(5px);
-      transition: all 0.3s;
-      width: 40px;
-      height: 40px;
+      transition: all 0.3s ease;
+      width: 36px;
+      height: 36px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -99,16 +99,25 @@
       gap: 3px;
     }
     
+    .hamburger-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    
     .hamburger-btn span {
       display: block;
-      width: 20px;
+      width: 18px;
       height: 2px;
       background: var(--text);
-      transition: all 0.3s;
+      border-radius: 1px;
+      transition: all 0.3s ease;
+    }
+    
+    .hamburger-btn.active {
+      background: rgba(139, 92, 246, 0.2);
     }
     
     .hamburger-btn.active span:nth-child(1) {
-      transform: rotate(45deg) translate(5px, 5px);
+      transform: rotate(45deg) translate(4px, 4px);
     }
     
     .hamburger-btn.active span:nth-child(2) {
@@ -116,7 +125,7 @@
     }
     
     .hamburger-btn.active span:nth-child(3) {
-      transform: rotate(-45deg) translate(7px, -6px);
+      transform: rotate(-45deg) translate(4px, -4px);
     }
     
     .language-dropdown {
@@ -124,18 +133,19 @@
       top: 100%;
       right: 0;
       margin-top: 0.5rem;
-      background: rgba(17, 24, 39, 0.95);
+      background: rgba(17, 24, 39, 0.98);
       border: 1px solid rgba(148, 163, 184, 0.2);
-      border-radius: 3%;
-      backdrop-filter: blur(10px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      border-radius: 12px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
       overflow: hidden;
       opacity: 0;
       visibility: hidden;
       transform: translateY(-10px);
-      transition: all 0.3s;
-      z-index: 100;
-      width: 160px; /* Fixed width - not too long */
+      transition: all 0.3s ease;
+      z-index: 1001;
+      width: 100px; /* Lebih kecil */
+      min-width: 100px;
     }
     
     .language-dropdown.active {
@@ -147,23 +157,29 @@
     .lang-option {
       display: block;
       width: 100%;
-      padding: 0.8rem 1rem;
+      padding: 0.6rem 0.8rem;
       background: none;
       border: none;
       color: var(--text);
-      text-align: left;
+      text-align: center;
       cursor: pointer;
-      transition: background 0.2s;
-      font-size: 0.9rem;
+      transition: all 0.2s ease;
+      font-size: 0.75rem; /* Text lebih kecil */
+      font-weight: 500;
       white-space: nowrap;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+    }
+    
+    .lang-option:last-child {
+      border-bottom: none;
     }
     
     .lang-option:hover {
-      background: rgba(139, 92, 246, 0.2);
+      background: rgba(139, 92, 246, 0.15);
     }
     
     .lang-option.active {
-      background: rgba(139, 92, 246, 0.3);
+      background: rgba(139, 92, 246, 0.25);
       color: var(--accent);
     }
     
@@ -175,6 +191,7 @@
       background-clip: text;
       -webkit-text-fill-color: transparent;
       margin-bottom: .4rem;
+      padding: 0 3rem;
     }
     
     header p {
@@ -182,6 +199,7 @@
       font-size: .95rem;
       max-width: 500px;
       margin: 0 auto;
+      padding: 0 2rem;
     }
     
     .container {
@@ -198,6 +216,32 @@
       }
     }
     
+    @media (max-width: 480px) {
+      .hamburger-menu {
+        top: 1rem;
+        right: 0.8rem;
+      }
+      
+      .hamburger-btn {
+        width: 32px;
+        height: 32px;
+      }
+      
+      .hamburger-btn span {
+        width: 16px;
+        height: 1.5px;
+      }
+      
+      header h1 {
+        padding: 0 2.5rem;
+      }
+      
+      header p {
+        padding: 0 1.5rem;
+      }
+    }
+    
+    /* CSS lainnya tetap sama */
     .card {
       background: var(--panel);
       border: 1px solid rgba(148, 163, 184, 0.15);
@@ -430,7 +474,6 @@
       background: rgba(255, 255, 255, 0.05);
     }
 
-    /* Install Prompt */
     .install-prompt {
       position: fixed;
       bottom: 20px;
@@ -461,9 +504,9 @@
   <header>
     <div class="avatar" title="Sleep Avatar"></div>
     
-    <!-- Hamburger Menu untuk Bahasa -->
+    <!-- PERBAIKAN: Hamburger Menu Minimalis -->
     <div class="hamburger-menu">
-      <button class="hamburger-btn" id="hamburgerBtn">
+      <button class="hamburger-btn" id="hamburgerBtn" aria-label="Language menu">
         <span></span>
         <span></span>
         <span></span>
@@ -581,7 +624,7 @@
       document.getElementById('calcWake').click(); 
     };
     
-    // Hamburger Menu Functionality
+    // PERBAIKAN: Hamburger Menu Functionality
     const hamburgerBtn = document.getElementById('hamburgerBtn');
     const languageDropdown = document.getElementById('languageDropdown');
     const langOptions = document.querySelectorAll('.lang-option');
@@ -594,9 +637,11 @@
     });
     
     // Close dropdown when clicking outside
-    document.addEventListener('click', () => {
-      hamburgerBtn.classList.remove('active');
-      languageDropdown.classList.remove('active');
+    document.addEventListener('click', (e) => {
+      if (!hamburgerBtn.contains(e.target) && !languageDropdown.contains(e.target)) {
+        hamburgerBtn.classList.remove('active');
+        languageDropdown.classList.remove('active');
+      }
     });
     
     // Language selection functionality
