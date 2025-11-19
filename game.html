@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a">
+  <title>Sleep Game</title>
+  
+  <!-- Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: rgba(30, 41, 59, 0.7);
+      --border: rgba(255, 255, 255, 0.1);
+      --primary: #818cf8;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --nav-bg: rgba(15, 23, 42, 0.9);
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      background-image: radial-gradient(circle at 50% 100%, #1e1b4b, #0f172a);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- HEADER --- */
+    header {
+      padding: 1.5rem;
+      text-align: center;
+      z-index: 10;
+      position: relative;
+    }
+    
+    h1 {
+      font-size: 1.5rem; font-weight: 700;
+      background: linear-gradient(to right, #a78bfa, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .score-board {
+      font-size: 2.5rem; font-weight: 700;
+      color: rgba(255,255,255,0.1);
+      margin-top: 0.5rem;
+      transition: color 0.3s;
+    }
+    .score-board.active { color: white; }
+
+    /* Tombol Mute/Unmute */
+    .btn-music {
+      position: absolute;
+      top: 1.5rem;
+      right: 1.5rem;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid var(--border);
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      color: var(--text);
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+      transition: all 0.2s;
+    }
+    .btn-music:active { transform: scale(0.9); }
+
+    /* --- GAME AREA --- */
+    #game-canvas {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    /* Rain Effect (Visual sederhana menggunakan CSS jika mau, tapi kita fokus audio dulu) */
+
+    /* Item yang melayang */
+    .floater {
+      position: absolute;
+      bottom: -50px;
+      font-size: 2.5rem;
+      cursor: pointer;
+      animation: floatUp linear forwards;
+      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+      transition: transform 0.1s;
+      z-index: 5;
+    }
+
+    .floater.popped {
+      transform: scale(1.5);
+      opacity: 0;
+      transition: all 0.2s ease-out;
+    }
+
+    @keyframes floatUp {
+      from { transform: translateY(0) rotate(0deg); }
+      to { transform: translateY(-120vh) rotate(360deg); }
+    }
+
+    /* --- START OVERLAY --- */
+    .overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 100px;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 50;
+      transition: opacity 0.5s;
+    }
+    
+    .overlay.hidden { opacity: 0; pointer-events: none; }
+
+    .btn-start {
+      background: var(--primary);
+      color: #0f172a;
+      border: none;
+      padding: 1rem 2.5rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(129, 140, 248, 0.5);
+      transition: transform 0.2s;
+    }
+    .btn-start:active { transform: scale(0.95); }
+
+    /* --- BOTTOM NAV --- */
+    .bottom-nav {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      background: var(--nav-bg);
+      backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      padding: 10px 20px;
+      border-radius: 50px;
+      display: flex; gap: 20px;
+      z-index: 100;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .nav-item {
+      color: var(--muted); text-decoration: none;
+      display: flex; flex-direction: column; align-items: center;
+      font-size: 0.7rem; gap: 4px; padding: 5px 10px;
+      border-radius: 15px; transition: 0.3s;
+    }
+    
+    .nav-item.active { color: var(--primary); background: rgba(129, 140, 248, 0.1); }
+    .nav-icon { font-size: 1.2rem; }
+
+  </style>
+</head>
+<body>
+
+  <!-- Audio Element for Rain (Hidden) -->
+  <audio id="rainAudio" loop src="https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg"></audio>
+
+  <header>
+    <h1>Dreamy Catch</h1>
+    <div class="score-board" id="scoreDisplay">0</div>
+    <!-- Tombol Mute -->
+    <button class="btn-music" id="musicBtn" onclick="toggleMusic()">🔇</button>
+  </header>
+
+  <div id="game-canvas">
+    <!-- Overlay Menu -->
+    <div class="overlay" id="startScreen">
+      <div style="font-size: 4rem; margin-bottom: 1rem;">🌧️🍌</div>
+      <p style="color: var(--muted); margin-bottom: 0.5rem;">Catch items & listen to rain.</p>
+      <p style="color: var(--muted); font-size:0.8rem; margin-bottom: 2rem;">Tap Play to start audio.</p>
+      <button class="btn-start" onclick="startGame()">PLAY</button>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="index.html" class="nav-item">
+      <span class="nav-icon">🏠</span>
+      <span>Home</span>
+    </a>
+    <a href="music.html" class="nav-item">
+      <span class="nav-icon">🎵</span>
+      <span>Music</span>
+    </a>
+    <a href="#" class="nav-item active">
+      <span class="nav-icon">🎮</span>
+      <span>Game</span>
+    </a>
+  </nav>
+
+  <script>
+    let score = 0;
+    let gameActive = false;
+    let spawnInterval;
+    
+    const canvas = document.getElementById('game-canvas');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const startScreen = document.getElementById('startScreen');
+    
+    // Audio Elements
+    const rainAudio = document.getElementById('rainAudio');
+    const musicBtn = document.getElementById('musicBtn');
+    
+    // Set Volume Hujan agar tidak terlalu keras (30%)
+    rainAudio.volume = 0.3;
+
+    const items = ['🍌', '⭐', '🌙', '💤', '🍌', '🍌'];
+
+    function toggleMusic() {
+      if (rainAudio.paused) {
+        rainAudio.play();
+        musicBtn.innerText = '🔊';
+      } else {
+        rainAudio.pause();
+        musicBtn.innerText = '🔇';
+      }
+    }
+
+    function startGame() {
+      gameActive = true;
+      score = 0;
+      scoreDisplay.innerText = 0;
+      scoreDisplay.classList.add('active');
+      startScreen.classList.add('hidden');
+
+      // Mulai Audio Hujan otomatis saat klik Play
+      // (Browser membutuhkan interaksi user untuk play audio)
+      rainAudio.play().then(() => {
+        musicBtn.innerText = '🔊';
+      }).catch(e => console.log("Audio play failed", e));
+
+      // Spawn logic
+      spawnInterval = setInterval(spawnItem, 900); // Sedikit lebih lambat agar rileks
+    }
+
+    function spawnItem() {
+      if (!gameActive) return;
+
+      const el = document.createElement('div');
+      el.classList.add('floater');
+      el.innerText = items[Math.floor(Math.random() * items.length)];
+      
+      const randomX = Math.floor(Math.random() * 80) + 10;
+      el.style.left = randomX + '%';
+      
+      // Durasi lambat 7-11 detik
+      const duration = Math.random() * 4 + 7; 
+      el.style.animationDuration = duration + 's';
+
+      const size = Math.random() * 1 + 2;
+      el.style.fontSize = size + 'rem';
+
+      el.addEventListener('pointerdown', () => popItem(el));
+      el.addEventListener('animationend', () => el.remove());
+
+      canvas.appendChild(el);
+    }
+
+    function popItem(el) {
+      if (el.classList.contains('popped')) return;
+      
+      playPopSound(); // Bunyi Pop
+
+      el.classList.add('popped');
+      score++;
+      scoreDisplay.innerText = score;
+
+      setTimeout(() => el.remove(), 200);
+    }
+
+    // Efek Suara Pop (Soft Sine Wave)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    
+    function playPopSound() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(300 + Math.random() * 100, audioCtx.currentTime); // Frekuensi lebih rendah (lebih deep)
+      
+      // Volume Pop (sedikit lebih keras dari hujan agar terdengar)
+      gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.15);
+    }
+
+    // Pause game & audio jika user pindah tab
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        clearInterval(spawnInterval);
+        gameActive = false;
+        startScreen.classList.remove('hidden');
+        
+        // Matikan audio saat keluar aplikasi (opsional, tapi disarankan)
+        rainAudio.pause();
+        musicBtn.innerText = '🔇';
+      }
+    });
+  </script>
+</body>
+</html>
