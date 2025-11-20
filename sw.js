@@ -1,24 +1,39 @@
-const CACHE_NAME = 'sleep-opt-v1';
-const ASSETS = [
+// Nama cache yang akan digunakan
+const CACHE_NAME = 'grafer-ctrl-v1';
+
+// Daftar file yang akan di-cache
+const URLS_TO_CACHE = [
   '/',
-  '/index.html',
-  // Tambahkan file css atau js lain jika ada
+  '/game.html', // Ganti dengan index.html jika itu file utama Anda
+  '/manifest.json',
+  '/192.png',
+  // Tambahkan file lainnya seperti CSS, JS, dan ikon lainnya
+  // '/js/main.js',
+  // '/css/style.css'
 ];
 
-// Install Service Worker
-self.addEventListener('install', (e) => {
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    })
+// Event install: Mendaftarkan file-file ke cache
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('Opened cache');
+        return cache.addAll(URLS_TO_CACHE);
+      })
   );
 });
 
-// Fetch Assets (Agar bisa offline)
-self.addEventListener('fetch', (e) => {
-  e.respondWith(
-    caches.match(e.request).then((response) => {
-      return response || fetch(e.request);
-    })
+// Event fetch: Melayani request dari cache jika tersedia
+self.addEventListener('fetch', event => {
+  event.respondWith(
+    caches.match(event.request)
+      .then(response => {
+        // Cache hit - return response
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      }
+    )
   );
 });
