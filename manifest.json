@@ -1,8 +1,8 @@
+// manifest.json
 {
   "name": "Grafer Ctrl Game",
   "short_name": "GraferCtrl",
-  "description": "Deskripsi singkat tentang game atau aplikasi web Anda.",
-  "start_url": "./",
+  "start_url": "./", // atau "/", ini akan membuka index.html
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
@@ -12,6 +12,5 @@
       "sizes": "192x192",
       "type": "image/png"
     }
-    // Anda bisa menambahkan ukuran ikon lainnya, misalnya 512x512
   ]
 }
