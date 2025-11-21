@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <!-- Viewport-fit=cover PENTING untuk layar HP poni/notch -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#0f172a">
   <title>Sleep Game</title>
@@ -17,21 +18,33 @@
       --primary: #818cf8;
       --text: #f1f5f9;
       --muted: #94a3b8;
-      --nav-bg: rgba(15, 23, 42, 0.9);
+      --nav-bg: rgba(15, 23, 42, 0.95);
     }
     
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
     
+    /* --- FIX UTAMA UNTUK ANDROID WEBVIEW --- */
+    html {
+      height: 100%;
+      width: 100%;
+      background-color: var(--bg); /* Mencegah layar putih */
+    }
+
     body {
       font-family: 'Inter', sans-serif;
       background: var(--bg);
       background-image: radial-gradient(circle at 50% 100%, #1e1b4b, #0f172a);
       color: var(--text);
-      height: 100vh;
+      /* Paksa tinggi 100% absolut */
+      width: 100%;
+      height: 100%;
+      position: absolute; 
+      top: 0; left: 0;
       overflow: hidden;
       display: flex;
       flex-direction: column;
     }
+    /* --------------------------------------- */
 
     /* --- HEADER --- */
     header {
@@ -39,6 +52,7 @@
       text-align: center;
       z-index: 10;
       position: relative;
+      flex-shrink: 0; /* Header jangan mengecil */
     }
     
     h1 {
@@ -56,7 +70,7 @@
     }
     .score-board.active { color: white; }
 
-    /* Tombol Mute/Unmute */
+    /* Tombol Mute */
     .btn-music {
       position: absolute;
       top: 1.5rem;
@@ -70,30 +84,28 @@
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       backdrop-filter: blur(4px);
-      transition: all 0.2s;
+      z-index: 20;
     }
-    .btn-music:active { transform: scale(0.9); }
 
     /* --- GAME AREA --- */
     #game-canvas {
-      flex: 1;
+      flex: 1; /* Mengisi sisa ruang kosong */
       position: relative;
+      width: 100%;
       overflow: hidden;
-      touch-action: none;
     }
 
-    /* Rain Effect (Visual sederhana menggunakan CSS jika mau, tapi kita fokus audio dulu) */
-
-    /* Item yang melayang */
+    /* Item Floating */
     .floater {
       position: absolute;
-      bottom: -50px;
+      bottom: -80px; /* Mulai dari bawah layar */
       font-size: 2.5rem;
       cursor: pointer;
       animation: floatUp linear forwards;
       filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
-      transition: transform 0.1s;
       z-index: 5;
+      /* Fix sentuhan di Android */
+      touch-action: manipulation; 
     }
 
     .floater.popped {
@@ -104,19 +116,20 @@
 
     @keyframes floatUp {
       from { transform: translateY(0) rotate(0deg); }
-      to { transform: translateY(-120vh) rotate(360deg); }
+      to { transform: translateY(-110vh) rotate(360deg); }
     }
 
     /* --- START OVERLAY --- */
     .overlay {
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 100px;
+      top: 0; left: 0; right: 0; bottom: 0;
       display: flex; flex-direction: column;
       justify-content: center; align-items: center;
       background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(8px);
       z-index: 50;
       transition: opacity 0.5s;
+      padding-bottom: 80px; /* Agar tombol tidak tertutup nav */
     }
     
     .overlay.hidden { opacity: 0; pointer-events: none; }
@@ -131,19 +144,22 @@
       border-radius: 50px;
       cursor: pointer;
       box-shadow: 0 0 20px rgba(129, 140, 248, 0.5);
-      transition: transform 0.2s;
     }
     .btn-start:active { transform: scale(0.95); }
 
     /* --- BOTTOM NAV --- */
     .bottom-nav {
-      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      position: fixed; 
+      bottom: 20px; 
+      left: 50%; 
+      transform: translateX(-50%);
+      width: 90%; max-width: 350px; /* Batasi lebar */
       background: var(--nav-bg);
       backdrop-filter: blur(20px);
       border: 1px solid var(--border);
-      padding: 10px 20px;
+      padding: 10px 0;
       border-radius: 50px;
-      display: flex; gap: 20px;
+      display: flex; justify-content: space-evenly;
       z-index: 100;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
@@ -151,8 +167,9 @@
     .nav-item {
       color: var(--muted); text-decoration: none;
       display: flex; flex-direction: column; align-items: center;
-      font-size: 0.7rem; gap: 4px; padding: 5px 10px;
-      border-radius: 15px; transition: 0.3s;
+      font-size: 0.7rem; gap: 4px;
+      width: 60px;
+      border-radius: 15px;
     }
     
     .nav-item.active { color: var(--primary); background: rgba(129, 140, 248, 0.1); }
@@ -162,27 +179,22 @@
 </head>
 <body>
 
-  <!-- Audio Element for Rain (Hidden) -->
   <audio id="rainAudio" loop src="https://actions.google.com/sounds/v1/weather/rain_heavy_loud.ogg"></audio>
 
   <header>
     <h1>Dreamy Catch</h1>
     <div class="score-board" id="scoreDisplay">0</div>
-    <!-- Tombol Mute -->
     <button class="btn-music" id="musicBtn" onclick="toggleMusic()">🔇</button>
   </header>
 
   <div id="game-canvas">
-    <!-- Overlay Menu -->
     <div class="overlay" id="startScreen">
       <div style="font-size: 4rem; margin-bottom: 1rem;">🌧️🍌</div>
-      <p style="color: var(--muted); margin-bottom: 0.5rem;">Catch items & listen to rain.</p>
-      <p style="color: var(--muted); font-size:0.8rem; margin-bottom: 2rem;">Tap Play to start audio.</p>
+      <p style="color: var(--muted); margin-bottom: 0.5rem;">Catch items & relax.</p>
       <button class="btn-start" onclick="startGame()">PLAY</button>
     </div>
   </div>
 
-  <!-- Bottom Navigation -->
   <nav class="bottom-nav">
     <a href="index.html" class="nav-item">
       <span class="nav-icon">🏠</span>
@@ -192,7 +204,7 @@
       <span class="nav-icon">🎵</span>
       <span>Music</span>
     </a>
-    <a href="#" class="nav-item active">
+    <a href="game.html" class="nav-item active">
       <span class="nav-icon">🎮</span>
       <span>Game</span>
     </a>
@@ -206,15 +218,11 @@
     const canvas = document.getElementById('game-canvas');
     const scoreDisplay = document.getElementById('scoreDisplay');
     const startScreen = document.getElementById('startScreen');
-    
-    // Audio Elements
     const rainAudio = document.getElementById('rainAudio');
     const musicBtn = document.getElementById('musicBtn');
     
-    // Set Volume Hujan agar tidak terlalu keras (30%)
     rainAudio.volume = 0.3;
-
-    const items = ['🍌', '⭐', '🌙', '💤', '🍌', '🍌'];
+    const items = ['🍌', '⭐', '🌙', '💤', '🍌'];
 
     function toggleMusic() {
       if (rainAudio.paused) {
@@ -233,82 +241,68 @@
       scoreDisplay.classList.add('active');
       startScreen.classList.add('hidden');
 
-      // Mulai Audio Hujan otomatis saat klik Play
-      // (Browser membutuhkan interaksi user untuk play audio)
       rainAudio.play().then(() => {
         musicBtn.innerText = '🔊';
-      }).catch(e => console.log("Audio play failed", e));
+      }).catch(e => console.log("Audio blocked", e));
 
-      // Spawn logic
-      spawnInterval = setInterval(spawnItem, 900); // Sedikit lebih lambat agar rileks
+      spawnInterval = setInterval(spawnItem, 900);
     }
 
     function spawnItem() {
       if (!gameActive) return;
-
       const el = document.createElement('div');
       el.classList.add('floater');
       el.innerText = items[Math.floor(Math.random() * items.length)];
       
-      const randomX = Math.floor(Math.random() * 80) + 10;
-      el.style.left = randomX + '%';
+      // Posisi Horizontal
+      el.style.left = (Math.random() * 80 + 10) + '%';
       
-      // Durasi lambat 7-11 detik
-      const duration = Math.random() * 4 + 7; 
-      el.style.animationDuration = duration + 's';
+      // Durasi Animasi
+      el.style.animationDuration = (Math.random() * 4 + 7) + 's';
+      el.style.fontSize = (Math.random() * 1 + 2) + 'rem';
 
-      const size = Math.random() * 1 + 2;
-      el.style.fontSize = size + 'rem';
+      // Event Click/Touch (Dukungan Mobile lebih baik)
+      const popAction = (e) => {
+        e.preventDefault(); // Mencegah double firing
+        popItem(el);
+      };
+      el.addEventListener('pointerdown', popAction);
+      el.addEventListener('touchstart', popAction);
 
-      el.addEventListener('pointerdown', () => popItem(el));
       el.addEventListener('animationend', () => el.remove());
-
       canvas.appendChild(el);
     }
 
     function popItem(el) {
       if (el.classList.contains('popped')) return;
-      
-      playPopSound(); // Bunyi Pop
-
+      playPopSound();
       el.classList.add('popped');
       score++;
       scoreDisplay.innerText = score;
-
       setTimeout(() => el.remove(), 200);
     }
 
-    // Efek Suara Pop (Soft Sine Wave)
+    // Sound Synth
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    
     function playPopSound() {
       if (audioCtx.state === 'suspended') audioCtx.resume();
-      
-      const oscillator = audioCtx.createOscillator();
-      const gainNode = audioCtx.createGain();
-
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(300 + Math.random() * 100, audioCtx.currentTime); // Frekuensi lebih rendah (lebih deep)
-      
-      // Volume Pop (sedikit lebih keras dari hujan agar terdengar)
-      gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-
-      oscillator.connect(gainNode);
-      gainNode.connect(audioCtx.destination);
-
-      oscillator.start();
-      oscillator.stop(audioCtx.currentTime + 0.15);
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(300 + Math.random() * 100, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.15);
     }
 
-    // Pause game & audio jika user pindah tab
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         clearInterval(spawnInterval);
         gameActive = false;
         startScreen.classList.remove('hidden');
-        
-        // Matikan audio saat keluar aplikasi (opsional, tapi disarankan)
         rainAudio.pause();
         musicBtn.innerText = '🔇';
       }
