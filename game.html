@@ -2,12 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <!-- Viewport-fit=cover PENTING untuk layar HP poni/notch -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#0f172a">
   <title>Sleep Game</title>
   
-  <!-- Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   
   <style>
@@ -23,36 +21,20 @@
     
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
     
-    /* --- FIX UTAMA UNTUK ANDROID WEBVIEW --- */
-    html {
-      height: 100%;
-      width: 100%;
-      background-color: var(--bg); /* Mencegah layar putih */
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
+    html, body {
+      width: 100%; height: 100%;
       background: var(--bg);
       background-image: radial-gradient(circle at 50% 100%, #1e1b4b, #0f172a);
       color: var(--text);
-      /* Paksa tinggi 100% absolut */
-      width: 100%;
-      height: 100%;
-      position: absolute; 
-      top: 0; left: 0;
+      font-family: 'Inter', sans-serif;
       overflow: hidden;
-      display: flex;
-      flex-direction: column;
+      position: fixed; /* Kunci posisi body agar tidak geser di Android */
     }
-    /* --------------------------------------- */
 
     /* --- HEADER --- */
     header {
-      padding: 1.5rem;
-      text-align: center;
-      z-index: 10;
-      position: relative;
-      flex-shrink: 0; /* Header jangan mengecil */
+      position: absolute; top: 0; left: 0; right: 0;
+      padding: 1.5rem; text-align: center; z-index: 50;
     }
     
     h1 {
@@ -64,116 +46,85 @@
     
     .score-board {
       font-size: 2.5rem; font-weight: 700;
-      color: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.2);
       margin-top: 0.5rem;
-      transition: color 0.3s;
     }
     .score-board.active { color: white; }
 
-    /* Tombol Mute */
     .btn-music {
-      position: absolute;
-      top: 1.5rem;
-      right: 1.5rem;
-      background: rgba(255,255,255,0.1);
-      border: 1px solid var(--border);
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      color: var(--text);
-      font-size: 1.2rem;
-      cursor: pointer;
+      position: absolute; top: 1.5rem; right: 1.5rem;
+      background: rgba(255,255,255,0.1); border: 1px solid var(--border);
+      width: 40px; height: 40px; border-radius: 50%;
+      color: var(--text); font-size: 1.2rem; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      backdrop-filter: blur(4px);
-      z-index: 20;
+      z-index: 60;
     }
 
-    /* --- GAME AREA --- */
-    #game-canvas {
-      flex: 1; /* Mengisi sisa ruang kosong */
-      position: relative;
-      width: 100%;
-      overflow: hidden;
-    }
-
-    /* Item Floating */
+    /* --- ITEM FLOATING (PISANG DLL) --- */
+    /* Perubahan: Menggunakan Fixed Position agar muncul di paling depan */
     .floater {
-      position: absolute;
-      bottom: -80px; /* Mulai dari bawah layar */
-      font-size: 2.5rem;
+      position: fixed; /* Kunci ke layar, bukan container */
+      top: 110%; /* Mulai dari bawah layar */
+      font-size: 3rem;
       cursor: pointer;
+      z-index: 20; /* Di bawah overlay/nav, di atas background */
+      
+      /* PERBAIKAN ANDROID: Paksa GPU Rendering */
+      will-change: transform;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      
       animation: floatUp linear forwards;
-      filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
-      z-index: 5;
-      /* Fix sentuhan di Android */
-      touch-action: manipulation; 
     }
 
     .floater.popped {
+      transition: transform 0.1s, opacity 0.1s;
       transform: scale(1.5);
       opacity: 0;
-      transition: all 0.2s ease-out;
     }
 
     @keyframes floatUp {
-      from { transform: translateY(0) rotate(0deg); }
-      to { transform: translateY(-110vh) rotate(360deg); }
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(-120vh) rotate(360deg); } /* Gerak ke atas 120% tinggi layar */
     }
 
-    /* --- START OVERLAY --- */
+    /* --- OVERLAY SCREEN --- */
     .overlay {
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
+      position: absolute; top: 0; left: 0; right: 0; bottom: 0;
       display: flex; flex-direction: column;
       justify-content: center; align-items: center;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(8px);
-      z-index: 50;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(5px);
+      z-index: 80; /* Di atas item */
       transition: opacity 0.5s;
-      padding-bottom: 80px; /* Agar tombol tidak tertutup nav */
     }
-    
     .overlay.hidden { opacity: 0; pointer-events: none; }
 
     .btn-start {
-      background: var(--primary);
-      color: #0f172a;
-      border: none;
-      padding: 1rem 2.5rem;
-      font-size: 1.2rem;
-      font-weight: 700;
-      border-radius: 50px;
-      cursor: pointer;
+      background: var(--primary); color: #0f172a; border: none;
+      padding: 1rem 3rem; font-size: 1.2rem; font-weight: 700;
+      border-radius: 50px; cursor: pointer;
       box-shadow: 0 0 20px rgba(129, 140, 248, 0.5);
     }
-    .btn-start:active { transform: scale(0.95); }
 
     /* --- BOTTOM NAV --- */
     .bottom-nav {
-      position: fixed; 
-      bottom: 20px; 
-      left: 50%; 
-      transform: translateX(-50%);
-      width: 90%; max-width: 350px; /* Batasi lebar */
-      background: var(--nav-bg);
-      backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      padding: 10px 0;
-      border-radius: 50px;
-      display: flex; justify-content: space-evenly;
-      z-index: 100;
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+      width: 90%; max-width: 350px;
+      background: var(--nav-bg); backdrop-filter: blur(20px);
+      border: 1px solid var(--border); padding: 10px 0;
+      border-radius: 50px; display: flex; justify-content: space-evenly;
+      z-index: 100; /* Paling atas */
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
 
     .nav-item {
       color: var(--muted); text-decoration: none;
       display: flex; flex-direction: column; align-items: center;
-      font-size: 0.7rem; gap: 4px;
-      width: 60px;
-      border-radius: 15px;
+      font-size: 0.7rem; width: 60px;
     }
-    
-    .nav-item.active { color: var(--primary); background: rgba(129, 140, 248, 0.1); }
-    .nav-icon { font-size: 1.2rem; }
+    .nav-item.active { color: var(--primary); }
+    .nav-icon { font-size: 1.4rem; margin-bottom: 2px; }
 
   </style>
 </head>
@@ -187,26 +138,23 @@
     <button class="btn-music" id="musicBtn" onclick="toggleMusic()">🔇</button>
   </header>
 
-  <div id="game-canvas">
-    <div class="overlay" id="startScreen">
-      <div style="font-size: 4rem; margin-bottom: 1rem;">🌧️🍌</div>
-      <p style="color: var(--muted); margin-bottom: 0.5rem;">Catch items & relax.</p>
-      <button class="btn-start" onclick="startGame()">PLAY</button>
-    </div>
+  <!-- Container Game dihapus karena kita pakai Fixed Position langsung ke Body -->
+  
+  <div class="overlay" id="startScreen">
+    <div style="font-size: 4rem; margin-bottom: 1rem;">🌧️🍌</div>
+    <p style="color: var(--muted); margin-bottom: 1.5rem;">Catch items & relax</p>
+    <button class="btn-start" onclick="startGame()">PLAY</button>
   </div>
 
   <nav class="bottom-nav">
     <a href="index.html" class="nav-item">
-      <span class="nav-icon">🏠</span>
-      <span>Home</span>
+      <span class="nav-icon">🏠</span><span>Home</span>
     </a>
     <a href="music.html" class="nav-item">
-      <span class="nav-icon">🎵</span>
-      <span>Music</span>
+      <span class="nav-icon">🎵</span><span>Music</span>
     </a>
     <a href="game.html" class="nav-item active">
-      <span class="nav-icon">🎮</span>
-      <span>Game</span>
+      <span class="nav-icon">🎮</span><span>Game</span>
     </a>
   </nav>
 
@@ -215,14 +163,14 @@
     let gameActive = false;
     let spawnInterval;
     
-    const canvas = document.getElementById('game-canvas');
     const scoreDisplay = document.getElementById('scoreDisplay');
     const startScreen = document.getElementById('startScreen');
     const rainAudio = document.getElementById('rainAudio');
     const musicBtn = document.getElementById('musicBtn');
     
     rainAudio.volume = 0.3;
-    const items = ['🍌', '⭐', '🌙', '💤', '🍌'];
+    // Menambah jumlah item dan variasi emoji
+    const items = ['🍌', '⭐', '🌙', '💤', '☁️', '🍌'];
 
     function toggleMusic() {
       if (rainAudio.paused) {
@@ -241,36 +189,43 @@
       scoreDisplay.classList.add('active');
       startScreen.classList.add('hidden');
 
-      rainAudio.play().then(() => {
-        musicBtn.innerText = '🔊';
-      }).catch(e => console.log("Audio blocked", e));
+      rainAudio.play().catch(e => console.log("Audio error:", e));
+      musicBtn.innerText = '🔊';
 
-      spawnInterval = setInterval(spawnItem, 900);
+      // Spawn setiap 800ms
+      spawnInterval = setInterval(spawnItem, 800);
     }
 
     function spawnItem() {
       if (!gameActive) return;
+
       const el = document.createElement('div');
       el.classList.add('floater');
       el.innerText = items[Math.floor(Math.random() * items.length)];
       
-      // Posisi Horizontal
-      el.style.left = (Math.random() * 80 + 10) + '%';
+      // Random Position Horizontal (5% - 85%)
+      el.style.left = (Math.random() * 80 + 5) + '%';
       
-      // Durasi Animasi
-      el.style.animationDuration = (Math.random() * 4 + 7) + 's';
-      el.style.fontSize = (Math.random() * 1 + 2) + 'rem';
+      // Random Speed (6s - 10s)
+      el.style.animationDuration = (Math.random() * 4 + 6) + 's';
+      
+      // Random Size
+      el.style.fontSize = (Math.random() * 1.5 + 2.5) + 'rem';
 
-      // Event Click/Touch (Dukungan Mobile lebih baik)
-      const popAction = (e) => {
-        e.preventDefault(); // Mencegah double firing
+      // Event Listeners untuk Android Touch
+      el.addEventListener('touchstart', (e) => {
+        e.preventDefault(); // Mencegah delay
         popItem(el);
-      };
-      el.addEventListener('pointerdown', popAction);
-      el.addEventListener('touchstart', popAction);
+      }, {passive: false});
+      
+      el.addEventListener('click', () => popItem(el));
 
-      el.addEventListener('animationend', () => el.remove());
-      canvas.appendChild(el);
+      el.addEventListener('animationend', () => {
+        if(el.parentNode) el.parentNode.removeChild(el);
+      });
+
+      // PENTING: Append langsung ke BODY, bukan ke div container
+      document.body.appendChild(el);
     }
 
     function popItem(el) {
@@ -279,23 +234,25 @@
       el.classList.add('popped');
       score++;
       scoreDisplay.innerText = score;
-      setTimeout(() => el.remove(), 200);
+      setTimeout(() => {
+        if(el.parentNode) el.parentNode.removeChild(el);
+      }, 150);
     }
 
-    // Sound Synth
+    // Sound FX
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playPopSound() {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(300 + Math.random() * 100, audioCtx.currentTime);
+      osc.frequency.setValueAtTime(250 + Math.random() * 100, audioCtx.currentTime);
       gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.15);
+      osc.stop(audioCtx.currentTime + 0.1);
     }
 
     document.addEventListener('visibilitychange', () => {
@@ -305,6 +262,9 @@
         startScreen.classList.remove('hidden');
         rainAudio.pause();
         musicBtn.innerText = '🔇';
+        
+        // Bersihkan semua pisang saat pause agar tidak menumpuk
+        document.querySelectorAll('.floater').forEach(e => e.remove());
       }
     });
   </script>
